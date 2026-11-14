@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset"UTF-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>سيريا بايك</title>
 <style>
@@ -33,29 +33,29 @@
 
 <div id="home">
   <div class="sections">
-    <button id="b1" class="active" onclick="show('rest')">مطاعم</button>
-    <button id="b2" onclick="show('market')">سوبر ماركت</button>
+    <button id="b1" class="active" data-type="rest">مطاعم</button>
+    <button id="b2" data-type="market">سوبر ماركت</button>
   </div>
   <div class="list" id="list"></div>
   <div id="cartBar">
     <span id="cartInfo">السلة فارغة</span>
-    <button onclick="openCart()">عرض السلة</button>
+    <button id="openCartBtn">عرض السلة</button>
   </div>
 </div>
 
 <div id="cartPage">
-  <button id="back" onclick="closeCart()">→ رجوع</button>
+  <button id="back">→ رجوع</button>
   <h2>سلة الطلب</h2>
   <div id="cartItems"></div>
   <div id="total"></div>
   <input class="field" id="custName" placeholder="اسمك">
   <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
-  <button id="confirm" onclick="confirmOrder()">تأكيد الطلب</button>
+  <button id="confirm">تأكيد الطلب</button>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -90,24 +90,108 @@ const DELIVERY_FEE = 20000;
 function fmt(x) { return x.toLocaleString('ar-SY') + ' ل.س'; }
 function allItems() { return data.rest.concat(data.market); }
 
-window.show = function(type) {
-  document.getElementById('b1').className = type==='rest' ? 'active' : '';
-  document.getElementById('b2').className = type==='market' ? 'active' : '';
-  document.getElementById('list').innerHTML = data[type].map(i =>
-    '<div class="card"><div><h3>' + i.n + '</h3><small>' + i.d + '</small>' +
-    '<div class="price">' + fmt(i.p) + '</div></div>' +
-    '<button class="addBtn" data-id="' + i.id + '">أضف</button></div>'
-  ).join('');
-};
+function show(type) {
+  document.getElementById('b1').className = type === 'rest' ? 'active' : '';
+  document.getElementById('b2').className = type === 'market' ? 'active' : '';
+  document.getElementById('list').innerHTML = data[type].map(function(i) {
+    return '<div class="card"><div><h3>' + i.n + '</h3><small>' + i.d + '</small>' +
+      '<div class="price">' + fmt(i.p) + '</div></div>' +
+      '<button class="addBtn" data-id="' + i.id + '">أضف</button></div>';
+  }).join('');
+}
 
-window.add = function(id) { cart[id] = (cart[id] || 0) + 1; updateBar(); };
+function add(id) { cart[id] = (cart[id] || 0) + 1; updateBar(); }
 
-window.change = function(id, d) {
+function change(id, d) {
   cart[id] = (cart[id] || 0) + d;
   if (cart[id] <= 0) delete cart[id];
   renderCart();
   updateBar();
-};
+}
 
 function totals() {
-  let count = 
+  let count = 0, sum = 0;
+  allItems().forEach(function(i) {
+    if (cart[i.id]) { count += cart[i.id]; sum += cart[i.id] * i.p; }
+  });
+  return {count: count, sum: sum};
+}
+
+function updateBar() {
+  const t = totals();
+  document.getElementById('cartInfo').textContent =
+    t.count === 0 ? 'السلة فارغة' : t.count + ' عناصر · ' + fmt(t.sum);
+}
+
+function renderCart() {
+  const rows = allItems().filter(function(i) { return cart[i.id]; }).map(function(i) {
+    return '<div class="row"><div><b>' + i.n + '</b><br><small>' + fmt(i.p) + '</small></div>' +
+      '<div class="qty"><button class="chgBtn" data-id="' + i.id + '" data-d="1">+</button>' +
+      '<span>' + cart[i.id] + '</span>' +
+      '<button class="chgBtn" data-id="' + i.id + '" data-d="-1">−</button></div></div>';
+  }).join('');
+  document.getElementById('cartItems').innerHTML = rows || '<p>السلة فارغة</p>';
+  const t = totals();
+  const fee = t.count ? DELIVERY_FEE : 0;
+  document.getElementById('total').innerHTML =
+    'المشتريات: ' + fmt(t.sum) + '<br>أجرة التوصيل: ' + fmt(fee) + '<br>المجموع: ' + fmt(t.sum + fee);
+}
+
+function openCart() {
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('cartPage').style.display = 'block';
+  renderCart();
+}
+
+function closeCart() {
+  document.getElementById('cartPage').style.display = 'none';
+  document.getElementById('home').style.display = 'block';
+}
+
+async function confirmOrder() {
+  const name = document.getElementById('custName').value.trim();
+  const addr = document.getElementById('custAddr').value.trim();
+  if (totals().count === 0) { alert('السلة فارغة'); return; }
+  if (!name || !addr) { alert('اكتب اسمك وعنوانك'); return; }
+
+  const items = allItems().filter(function(i) { return cart[i.id]; }).map(function(i) {
+    return {n: i.n, shop: i.d, q: cart[i.id], p: i.p};
+  });
+
+  try {
+    const ref = await addDoc(collection(db, 'orders'), {
+      customer: name,
+      address: addr,
+      items: items,
+      subtotal: totals().sum,
+      deliveryFee: DELIVERY_FEE,
+      total: totals().sum + DELIVERY_FEE,
+      state: 'new',
+      createdAt: serverTimestamp()
+    });
+    alert('تم استلام طلبك! رقم الطلب: ' + ref.id.slice(0, 6));
+    cart = {};
+    document.getElementById('custName').value = '';
+    document.getElementById('custAddr').value = '';
+    updateBar();
+    closeCart();
+  } catch (e) {
+    alert('صار خطأ، جرب مرة ثانية');
+    console.error(e);
+  }
+}
+
+document.addEventListener('click', function(e) {
+  const t = e.target;
+  if (t.dataset.type) { show(t.dataset.type); return; }
+  if (t.classList.contains('addBtn')) { add(Number(t.dataset.id)); return; }
+  if (t.classList.contains('chgBtn')) { change(Number(t.dataset.id), Number(t.dataset.d)); return; }
+  if (t.id === 'openCartBtn') { openCart(); return; }
+  if (t.id === 'back') { closeCart(); return; }
+  if (t.id === 'confirm') { confirmOrder(); return; }
+});
+
+show('rest');
+</script>
+</body>
+</html>
