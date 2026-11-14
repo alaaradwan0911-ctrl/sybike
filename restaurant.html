@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سيريا بايك - المطعم</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e65100">
+<style>
+  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; }
+  header { background:#e65100; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
+  #loginBox { padding:20px; }
+  #loginBox h2 { text-align:center; color:#e65100; }
+  #loginBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#e65100; color:white; font-size:17px; font-weight:bold; }
+  #loginErr { color:#c62828; text-align:center; margin-top:10px; }
+  #app { display:none; }
+  #logout { background:white; color:#e65100; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; margin:10px 12px 0 12px; }
+  .pick { padding:12px; }
+  .pick select { width:100%; padding:12px; font-size:16px; border-radius:8px; border:1px solid #ccc; }
+  .sub { margin:0 12px 8px 12px; padding:12px; border-radius:10px; text-align:center; font-weight:bold; }
+  .sub.ok { background:#c8e6c9; color:#2e7d32; }
+  .sub.bad { background:#ffcdd2; color:#c62828; }
+  .info { padding:0 12px 6px 12px; color:#555; text-align:center; }
+  .order { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .order h3 { margin:0 0 8px 0; }
+  .item { padding:4px 0; font-size:17px; }
+  .addr { color:#666; margin:10px 0; padding-top:8px; border-top:1px solid #eee; }
+  .status { display:inline-block; padding:4px 12px; border-radius:20px; font-size:14px; margin-bottom:8px; }
+  .new { background:#ffe0b2; color:#e65100; }
+  .cooking { background:#fff9c4; color:#f57f17; }
+  .order button { width:100%; padding:12px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#e65100; }
+  .order button.done { background:#2e7d32; }
+  .order button:disabled { background:#bbb; }
+  .empty { text-align:center; color:#888; padding:30px; }
+</style>
+</head>
+<body>
+<header>🍽️ واجهة المطعم</header>
+
+<div id="loginBox">
+  <h2>تسجيل دخول المطعم</h2>
+  <input id="email" type="email" placeholder="الإيميل">
+  <input id="pass" type="password" placeholder="كلمة السر">
+  <button id="loginBtn">دخول</button>
+  <div id="loginErr"></div>
+</div>
+
+<div id="app">
+  <button id="logout">خروج</button>
+  <div class="pick">
+    <select id="shop">
+      <option>مطعم الشام</option>
+      <option>فلافل أبو علي</option>
+      <option>حلويات الغوطة</option>
+      <option>مشاوي الريف</option>
+      <option>سوبر ماركت النور</option>
+      <option>ميني ماركت الحي</option>
+    </select>
+  </div>
+  <div id="subBar"></div>
+  <div class="info" id="info"></div>
+  <div id="orders"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
+  authDomain: "syria-bike.firebaseapp.com",
+  projectId: "syria-bike",
+  storageBucket: "syria-bike.firebasestorage.app",
+  messagingSenderId: "417884008874",
+  appId: "1:417884008874:web:f95dc7c3886c765b3bbbd3"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const labels = {new:'طلب جديد', cooking:'قيد التحضير'};
+let allOrders = [];
+let members = [];
+let started = false;
+
+function startListening() {
+  if (started) return;
+  started = true;
+  onSnapshot(collection(db, 'orders'), function(snap) {
+    allOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+    render();
+  });
+  onSnapshot(collection(db, 'members'), function(snap) {
+    members = snap.docs.map(function(d) { const m = d.data(); m.id = d.id; return m; });
+    render();
+  });
+}
+
+onAuthStateChanged(auth, function(user) {
+  if (user) {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    startListening();
+  } else {
+    document.getElementById('loginBox').style.display = 'block';
+    document.getElementById('app').style.display = 'none';
+  }
+});
+
+async function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pass = document.getElementById('pass').value;
+  document.getElementById('loginErr').textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
+  }
+}
+
+function subscriptionOk(shop) {
+  const m = members.find(function(x) { return x.type === 'shop' && x.name === shop; });
+  return { member: m, ok: !!(m && m.paidUntil && m.paidUntil > Date.now()) };
+}
+
+function render() {
+  const shop = document.getElementById('shop').value;
+  const sub = subscriptionOk(shop);
+
+  if (sub.ok) {
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(sub.member.paidUntil).toLocaleDateString('ar-SY') + '</div>';
+  } else if (sub.member && sub.member.paidUntil) {
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (10 دولار بالشهر)</div>';
+  } else {
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (10 دولار بالشهر)</div>';
+  }
+
+  const mine = allOrders.filter(function(o) {
+    return (o.state === 'new' || o.state === 'cooking') &&
+      o.items.some(function(i) { return i.shop === shop; });
+  });
+  document.getElementById('info').textContent = 'عدد الطلبات الحالية: ' + mine.length;
+
+  if (mine.length === 0) {
+    document.getElementById('orders').innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>';
+    return;
+  }
+
+  document.getElementById('orders').innerHTML = mine.map(function(o) {
+    const items = o.items.filter(function(i) { return i.shop === shop; })
+      .map(function(i) { return '<div class="item">• ' + i.n + ' × ' + i.q + '</div>'; }).join('');
+    let btn;
+    if (o.state === 'new') {
+      btn = '<button class="act" ' + (sub.ok ? '' : 'disabled') + ' data-id="' + o.id + '" data-s="cooking">' +
+        (sub.ok ? 'قبول الطلب' : 'الاشتراك غير مفعّل') + '</button>';
+    } else {
+      btn = '<button class="act done" data-id="' + o.id + '" data-s="ready">جاهز للتسليم</button>';
+    }
+    return '<div class="order"><span class="status ' + o.state + '">' + labels[o.state] + '</span>' +
+      '<h3>طلب رقم ' + o.id.slice(0, 6) + '</h3>' + items +
+      '<div class="addr">📍 ' + o.address + '</div>' + btn + '</div>';
+  }).join('');
+}
+
+document.getElementById('shop').addEventListener('change', render);
+
+document.addEventListener('click', async function(e) {
+  const t = e.target;
+  if (t.id === 'loginBtn') { doLogin(); return; }
+  if (t.id === 'logout') { signOut(auth); return; }
+  if (t.classList.contains('act') && !t.disabled) {
+    await updateDoc(doc(db, 'orders', t.dataset.id), { state: t.dataset.s });
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && document.getElementById('loginBox').style.display !== 'none') { doLogin(); }
+});
+</script>
+</body>
+</html>
