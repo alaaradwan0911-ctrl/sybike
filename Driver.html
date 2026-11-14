@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سيريا بايك - السائق</title>
+<style>
+  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; }
+  header { background:#1565c0; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
+  .me { padding:12px; }
+  .me input { width:100%; box-sizing:border-box; padding:12px; font-size:16px; border-radius:8px; border:1px solid #ccc; }
+  .stats { display:flex; gap:10px; padding:0 12px 12px 12px; }
+  .stat { flex:1; background:white; border-radius:12px; padding:12px; text-align:center; }
+  .stat b { display:block; font-size:20px; color:#1565c0; margin-top:4px; }
+  .order { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .order h3 { margin:0 0 8px 0; }
+  .line { padding:4px 0; color:#444; }
+  .status { display:inline-block; padding:4px 12px; border-radius:20px; font-size:14px; margin-bottom:8px; }
+  .ready { background:#bbdefb; color:#1565c0; }
+  .onway { background:#fff9c4; color:#f57f17; }
+  .order button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#1565c0; }
+  .order button.done { background:#2e7d32; }
+  .empty { text-align:center; color:#888; padding:30px; }
+</style>
+</head>
+<body>
+<header>🚲 واجهة السائق</header>
+
+<div class="me">
+  <input id="driverName" placeholder="اكتب اسمك هنا (مثلاً: أحمد)">
+</div>
+
+<div class="stats">
+  <div class="stat">توصيلاتك<b id="count">0</b></div>
+  <div class="stat">أرباحك<b id="earn">0</b></div>
+</div>
+
+<div id="orders"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
+  authDomain: "syria-bike.firebaseapp.com",
+  projectId: "syria-bike",
+  storageBucket: "syria-bike.firebasestorage.app",
+  messagingSenderId: "417884008874",
+  appId: "1:417884008874:web:f95dc7c3886c765b3bbbd3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const labels = {ready:'جاهز للاستلام', onway:'في الطريق للزبون'};
+let allOrders = [];
+
+function fmt(x) { return x.toLocaleString('ar-SY') + ' ل.س'; }
+
+onSnapshot(collection(db, 'orders'), function(snap) {
+  allOrders = snap.docs.map(function(d) {
+    const o = d.data();
+    o.id = d.id;
+    return o;
+  });
+  render();
+});
+
+document.getElementById('driverName').addEventListener('input', render);
+
+function render() {
+  const me = document.getElementById('driverName').value.trim();
+
+  const mineDone = allOrders.filter(function(o) {
+    return o.state === 'delivered' && me && o.driver === me;
+  });
+  document.getElementById('count').textContent = mineDone.length;
+  document.getElementById('earn').textContent = fmt(mineDone.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
+
+  const list = allOrders.filter(function(o) {
+    if (o.state === 'ready') return true;
+    if (o.state === 'onway' && me && o.driver === me) return true;
+    return false;
+  });
+
+  if (list.length === 0) {
+    document.getElementById('orders').innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>';
+    return;
+  }
+
+  document.getElementById('orders').innerHTML = list.map(function(o) {
+    const shops = Array.from(new Set(o.items.map(function(i) { return i.shop; }))).join('، ');
+    let btn;
+    if (o.state === 'ready') btn = '<button class="act" data-id="' + o.id + '" data-s="onway">استلمت الطلب</button>';
+    else btn = '<button class="act done" data-id="' + o.id + '" data-s="delivered">تم التوصيل</button>';
+    return '<div class="order"><span class="status ' + o.state + '">' + labels[o.state] + '</span>' +
+      '<h3>طلب رقم ' + o.id.slice(0, 6) + '</h3>' +
+      '<div class="line">🍽️ من: ' + shops + '</div>' +
+      '<div class="line">👤 الزبون: ' + o.customer + '</div>' +
+      '<div class="line">📍 إلى: ' + o.address + '</div>' +
+      '<div class="line">💵 المبلغ المطلوب من الزبون: ' + fmt(o.total) + '</div>' +
+      '<div class="line">🚲 أجرتك من هذا الطلب: ' + fmt(o.deliveryFee || 0) + '</div>' + btn + '</div>';
+  }).join('');
+}
+
+document.addEventListener('click', async function(e) {
+  const t = e.target;
+  if (!t.classList.contains('act')) return;
+  const me = document.getElementById('driverName').value.trim();
+  if (!me) { alert('اكتب اسمك بالخانة فوق أولاً'); return; }
+  const data = { state: t.dataset.s };
+  if (t.dataset.s === 'onway') data.driver = me;
+  await updateDoc(doc(db, 'orders', t.dataset.id), data);
+});
+</script>
+</body>
+</html>
