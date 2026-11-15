@@ -235,7 +235,8 @@ function renderProducts(shop) {
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { signOut(auth); return; }
+    if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); editId = null; render(); return; }
 
   if (t.classList.contains('act') && !t.disabled) {
