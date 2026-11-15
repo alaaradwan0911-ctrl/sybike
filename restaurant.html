@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest-restaurant.json">
 <meta name="theme-color" content="#e65100">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; }
+  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
   header { background:#e65100; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
   #loginBox { padding:20px; }
   #loginBox h2 { text-align:center; color:#e65100; }
@@ -16,11 +16,13 @@
   #loginErr { color:#c62828; text-align:center; margin-top:10px; }
   #app { display:none; }
   #logout { background:white; color:#e65100; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; margin:10px 12px 0 12px; }
-  .pick { padding:12px; }
-  .pick select { width:100%; padding:12px; font-size:16px; border-radius:8px; border:1px solid #ccc; }
+  .shopName { text-align:center; font-size:20px; font-weight:bold; padding:10px; color:#e65100; }
   .sub { margin:0 12px 8px 12px; padding:12px; border-radius:10px; text-align:center; font-weight:bold; }
   .sub.ok { background:#c8e6c9; color:#2e7d32; }
   .sub.bad { background:#ffcdd2; color:#c62828; }
+  .tabs { display:flex; gap:8px; padding:0 12px 8px 12px; }
+  .tabs button { flex:1; padding:12px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
+  .tabs button.active { background:#e65100; color:white; }
   .info { padding:0 12px 6px 12px; color:#555; text-align:center; }
   .order { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
   .order h3 { margin:0 0 8px 0; }
@@ -32,6 +34,15 @@
   .order button { width:100%; padding:12px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#e65100; }
   .order button.done { background:#2e7d32; }
   .order button:disabled { background:#bbb; }
+  .add { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .add input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:8px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  .add button { width:100%; padding:12px; border:none; border-radius:8px; background:#e65100; color:white; font-size:16px; font-weight:bold; }
+  .prod { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .prod h3 { margin:0 0 4px 0; }
+  .prod .price { color:#e65100; font-weight:bold; }
+  .btn { padding:10px 14px; border:none; border-radius:8px; color:white; font-size:15px; margin-top:8px; margin-left:6px; }
+  .edit { background:#1565c0; }
+  .del { background:#c62828; }
   .empty { text-align:center; color:#888; padding:30px; }
 </style>
 </head>
@@ -48,25 +59,19 @@
 
 <div id="app">
   <button id="logout">خروج</button>
-  <div class="pick">
-    <select id="shop">
-      <option>مطعم الشام</option>
-      <option>فلافل أبو علي</option>
-      <option>حلويات الغوطة</option>
-      <option>مشاوي الريف</option>
-      <option>سوبر ماركت النور</option>
-      <option>ميني ماركت الحي</option>
-    </select>
-  </div>
+  <div class="shopName" id="shopName"></div>
   <div id="subBar"></div>
-  <div class="info" id="info"></div>
-  <div id="orders"></div>
+  <div class="tabs">
+    <button id="t1" class="active" data-tab="1">الطلبات</button>
+    <button id="t2" data-tab="2">المنتجات</button>
+  </div>
+  <div id="content"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -84,7 +89,19 @@ const db = getFirestore(app);
 const labels = {new:'طلب جديد', cooking:'قيد التحضير'};
 let allOrders = [];
 let members = [];
+let products = [];
+let myEmail = '';
+let current = 1;
+let editId = null;
 let started = false;
+
+function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
+
+function myShop() {
+  return members.find(function(m) {
+    return m.type === 'shop' && m.email && m.email.toLowerCase() === myEmail;
+  });
+}
 
 function startListening() {
   if (started) return;
@@ -97,14 +114,21 @@ function startListening() {
     members = snap.docs.map(function(d) { const m = d.data(); m.id = d.id; return m; });
     render();
   });
+  onSnapshot(collection(db, 'products'), function(snap) {
+    products = snap.docs.map(function(d) { const p = d.data(); p.id = d.id; return p; });
+    render();
+  });
 }
 
 onAuthStateChanged(auth, function(user) {
   if (user) {
+    myEmail = (user.email || '').toLowerCase();
     document.getElementById('loginBox').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     startListening();
+    render();
   } else {
+    myEmail = '';
     document.getElementById('loginBox').style.display = 'block';
     document.getElementById('app').style.display = 'none';
   }
@@ -121,19 +145,28 @@ async function doLogin() {
   }
 }
 
-function subscriptionOk(shop) {
-  const m = members.find(function(x) { return x.type === 'shop' && x.name === shop; });
-  return { member: m, ok: !!(m && m.paidUntil && m.paidUntil > Date.now()) };
-}
-
 function render() {
-  const shop = document.getElementById('shop').value;
-  const sub = subscriptionOk(shop);
+  document.getElementById('t1').className = current === 1 ? 'active' : '';
+  document.getElementById('t2').className = current === 2 ? 'active' : '';
+  const shopRec = myShop();
+  const content = document.getElementById('content');
 
-  if (sub.ok) {
+  if (!shopRec) {
+    document.getElementById('shopName').textContent = '';
     document.getElementById('subBar').innerHTML =
-      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(sub.member.paidUntil).toLocaleDateString('ar-SY') + '</div>';
-  } else if (sub.member && sub.member.paidUntil) {
+      '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي محل. تواصل مع الإدارة.</div>';
+    content.innerHTML = '';
+    return;
+  }
+
+  const shop = shopRec.name;
+  const ok = !!(shopRec.paidUntil && shopRec.paidUntil > Date.now());
+  document.getElementById('shopName').textContent = shop;
+
+  if (ok) {
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(shopRec.paidUntil).toLocaleDateString('ar-SY') + '</div>';
+  } else if (shopRec.paidUntil) {
     document.getElementById('subBar').innerHTML =
       '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (10 دولار بالشهر)</div>';
   } else {
@@ -141,24 +174,27 @@ function render() {
       '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (10 دولار بالشهر)</div>';
   }
 
+  if (current === 1) { renderOrders(shop, ok); } else { renderProducts(shop); }
+}
+
+function renderOrders(shop, ok) {
+  const content = document.getElementById('content');
   const mine = allOrders.filter(function(o) {
     return (o.state === 'new' || o.state === 'cooking') &&
       o.items.some(function(i) { return i.shop === shop; });
   });
-  document.getElementById('info').textContent = 'عدد الطلبات الحالية: ' + mine.length;
-
+  let html = '<div class="info">عدد الطلبات الحالية: ' + mine.length + '</div>';
   if (mine.length === 0) {
-    document.getElementById('orders').innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>';
+    content.innerHTML = html + '<div class="empty">لا يوجد طلبات حالياً</div>';
     return;
   }
-
-  document.getElementById('orders').innerHTML = mine.map(function(o) {
+  html += mine.map(function(o) {
     const items = o.items.filter(function(i) { return i.shop === shop; })
       .map(function(i) { return '<div class="item">• ' + i.n + ' × ' + i.q + '</div>'; }).join('');
     let btn;
     if (o.state === 'new') {
-      btn = '<button class="act" ' + (sub.ok ? '' : 'disabled') + ' data-id="' + o.id + '" data-s="cooking">' +
-        (sub.ok ? 'قبول الطلب' : 'الاشتراك غير مفعّل') + '</button>';
+      btn = '<button class="act" ' + (ok ? '' : 'disabled') + ' data-id="' + o.id + '" data-s="cooking">' +
+        (ok ? 'قبول الطلب' : 'الاشتراك غير مفعّل') + '</button>';
     } else {
       btn = '<button class="act done" data-id="' + o.id + '" data-s="ready">جاهز للتسليم</button>';
     }
@@ -166,16 +202,76 @@ function render() {
       '<h3>طلب رقم ' + o.id.slice(0, 6) + '</h3>' + items +
       '<div class="addr">📍 ' + o.address + '</div>' + btn + '</div>';
   }).join('');
+  content.innerHTML = html;
 }
 
-document.getElementById('shop').addEventListener('change', render);
+function renderProducts(shop) {
+  const content = document.getElementById('content');
+  const mine = products.filter(function(p) { return p.ownerEmail === myEmail; });
+  const editing = editId ? mine.find(function(p) { return p.id === editId; }) : null;
+
+  let html = '<div class="add"><b>' + (editing ? 'تعديل المنتج' : 'إضافة منتج جديد') + '</b><br><br>' +
+    '<input id="pName" placeholder="اسم المنتج" value="' + (editing ? editing.n.replace(/"/g, '&quot;') : '') + '">' +
+    '<input id="pPrice" type="number" inputmode="numeric" placeholder="السعر بالليرة" value="' + (editing ? editing.p : '') + '">' +
+    '<input id="pType" placeholder="النوع: مطعم أو سوبر ماركت" value="' + (editing ? editing.type : 'مطعم') + '">' +
+    '<button data-act="save">' + (editing ? 'حفظ التعديل' : 'إضافة') + '</button>' +
+    (editing ? '<button data-act="cancel" style="background:#888;margin-top:8px">إلغاء</button>' : '') +
+    '</div>';
+
+  if (mine.length === 0) {
+    html += '<div class="empty">لا يوجد منتجات بعد. أضف أول منتج.</div>';
+  } else {
+    html += mine.map(function(p) {
+      return '<div class="prod"><h3>' + p.n + '</h3><div class="price">' + fmt(p.p) + '</div>' +
+        '<div style="color:#666">' + p.type + '</div>' +
+        '<button class="btn edit" data-act="edit" data-id="' + p.id + '">تعديل</button>' +
+        '<button class="btn del" data-act="del" data-id="' + p.id + '">حذف</button></div>';
+    }).join('');
+  }
+  content.innerHTML = html;
+}
 
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
   if (t.id === 'logout') { signOut(auth); return; }
+  if (t.dataset.tab) { current = Number(t.dataset.tab); editId = null; render(); return; }
+
   if (t.classList.contains('act') && !t.disabled) {
     await updateDoc(doc(db, 'orders', t.dataset.id), { state: t.dataset.s });
+    return;
+  }
+
+  const act = t.dataset.act;
+  if (!act) return;
+  const shopRec = myShop();
+  if (!shopRec) return;
+
+  if (act === 'save') {
+    const n = document.getElementById('pName').value.trim();
+    const p = Number(document.getElementById('pPrice').value);
+    let type = document.getElementById('pType').value.trim();
+    if (!n || !p || p <= 0) { alert('اكتب اسم المنتج وسعراً صحيحاً'); return; }
+    if (type !== 'سوبر ماركت') type = 'مطعم';
+    try {
+      if (editId) {
+        await updateDoc(doc(db, 'products', editId), { n: n, p: p, type: type });
+        editId = null;
+      } else {
+        await addDoc(collection(db, 'products'), {
+          n: n, p: p, type: type, shop: shopRec.name, ownerEmail: myEmail
+        });
+      }
+    } catch (err) {
+      alert('صار خطأ، جرب مرة ثانية');
+      console.error(err);
+    }
+  }
+  if (act === 'edit') { editId = t.dataset.id; render(); }
+  if (act === 'cancel') { editId = null; render(); }
+  if (act === 'del' && confirm('حذف هذا المنتج؟')) {
+    try { await deleteDoc(doc(db, 'products', t.dataset.id)); }
+    catch (err) { alert('صار خطأ، جرب مرة ثانية'); console.error(err); }
   }
 });
 
