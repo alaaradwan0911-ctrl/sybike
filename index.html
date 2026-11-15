@@ -18,6 +18,7 @@
   .card small { color:#666; }
   .card .price { color:#2e7d32; font-weight:bold; margin-top:4px; }
   .card button { background:#2e7d32; color:white; border:none; padding:10px 16px; border-radius:8px; }
+  .empty { text-align:center; color:#888; padding:30px; }
   #cartBar { position:fixed; bottom:0; left:0; right:0; background:#1b5e20; color:white; padding:16px; display:flex; justify-content:space-between; align-items:center; font-size:17px; }
   #cartBar button { background:white; color:#1b5e20; border:none; padding:10px 18px; border-radius:8px; font-weight:bold; }
   #cartPage { display:none; padding:12px; }
@@ -35,8 +36,8 @@
 
 <div id="home">
   <div class="sections">
-    <button id="b1" class="active" data-type="rest">مطاعم</button>
-    <button id="b2" data-type="market">سوبر ماركت</button>
+    <button id="b1" class="active" data-type="مطعم">مطاعم</button>
+    <button id="b2" data-type="سوبر ماركت">سوبر ماركت</button>
   </div>
   <div class="list" id="list"></div>
   <div id="cartBar">
@@ -57,7 +58,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -71,32 +72,40 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const data = {
-  rest: [
-    {id:1, n:'ساندويش شاورما دجاج', d:'مطعم الشام', p:15000},
-    {id:2, n:'ساندويش فلافل', d:'فلافل أبو علي', p:8000},
-    {id:3, n:'كنافة نابلسية', d:'حلويات الغوطة', p:20000},
-    {id:4, n:'صحن مشاوي مشكل', d:'مشاوي الريف', p:60000}
-  ],
-  market: [
-    {id:5, n:'سلة خضار وفواكه', d:'سوبر ماركت النور', p:45000},
-    {id:6, n:'علبة حليب', d:'ميني ماركت الحي', p:12000},
-    {id:7, n:'كيس رز', d:'سوبر ماركت النور', p:25000},
-    {id:8, n:'عبوة مياه', d:'ميني ماركت الحي', p:5000}
-  ]
-};
-
+let products = [];
+let loaded = false;
 let cart = {};
+let currentType = 'مطعم';
 const DELIVERY_FEE = 20000;
 
-function fmt(x) { return x.toLocaleString('ar-SY') + ' ل.س'; }
-function allItems() { return data.rest.concat(data.market); }
+function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
+
+onSnapshot(collection(db, 'products'), function(snap) {
+  products = snap.docs.map(function(d) { const p = d.data(); p.id = d.id; return p; });
+  loaded = true;
+  show(currentType);
+  updateBar();
+}, function(err) {
+  loaded = true;
+  console.error(err);
+  show(currentType);
+});
 
 function show(type) {
-  document.getElementById('b1').className = type === 'rest' ? 'active' : '';
-  document.getElementById('b2').className = type === 'market' ? 'active' : '';
-  document.getElementById('list').innerHTML = data[type].map(function(i) {
-    return '<div class="card"><div><h3>' + i.n + '</h3><small>' + i.d + '</small>' +
+  currentType = type;
+  document.getElementById('b1').className = type === 'مطعم' ? 'active' : '';
+  document.getElementById('b2').className = type === 'سوبر ماركت' ? 'active' : '';
+  const list = products.filter(function(p) { return p.type === type; });
+  if (!loaded) {
+    document.getElementById('list').innerHTML = '<div class="empty">جاري التحميل...</div>';
+    return;
+  }
+  if (list.length === 0) {
+    document.getElementById('list').innerHTML = '<div class="empty">لا يوجد منتجات حالياً، تابعنا قريباً</div>';
+    return;
+  }
+  document.getElementById('list').innerHTML = list.map(function(i) {
+    return '<div class="card"><div><h3>' + i.n + '</h3><small>' + i.shop + '</small>' +
       '<div class="price">' + fmt(i.p) + '</div></div>' +
       '<button class="addBtn" data-id="' + i.id + '">أضف</button></div>';
   }).join('');
@@ -111,11 +120,13 @@ function change(id, d) {
   updateBar();
 }
 
+function cartItems() {
+  return products.filter(function(p) { return cart[p.id]; });
+}
+
 function totals() {
   let count = 0, sum = 0;
-  allItems().forEach(function(i) {
-    if (cart[i.id]) { count += cart[i.id]; sum += cart[i.id] * i.p; }
-  });
+  cartItems().forEach(function(i) { count += cart[i.id]; sum += cart[i.id] * i.p; });
   return {count: count, sum: sum};
 }
 
@@ -126,8 +137,8 @@ function updateBar() {
 }
 
 function renderCart() {
-  const rows = allItems().filter(function(i) { return cart[i.id]; }).map(function(i) {
-    return '<div class="row"><div><b>' + i.n + '</b><br><small>' + fmt(i.p) + '</small></div>' +
+  const rows = cartItems().map(function(i) {
+    return '<div class="row"><div><b>' + i.n + '</b><br><small>' + i.shop + ' · ' + fmt(i.p) + '</small></div>' +
       '<div class="qty"><button class="chgBtn" data-id="' + i.id + '" data-d="1">+</button>' +
       '<span>' + cart[i.id] + '</span>' +
       '<button class="chgBtn" data-id="' + i.id + '" data-d="-1">−</button></div></div>';
@@ -156,8 +167,8 @@ async function confirmOrder() {
   if (totals().count === 0) { alert('السلة فارغة'); return; }
   if (!name || !addr) { alert('اكتب اسمك وعنوانك'); return; }
 
-  const items = allItems().filter(function(i) { return cart[i.id]; }).map(function(i) {
-    return {n: i.n, shop: i.d, q: cart[i.id], p: i.p};
+  const items = cartItems().map(function(i) {
+    return {n: i.n, shop: i.shop, q: cart[i.id], p: i.p};
   });
 
   try {
@@ -186,8 +197,8 @@ async function confirmOrder() {
 document.addEventListener('click', function(e) {
   const t = e.target;
   if (t.dataset.type) { show(t.dataset.type); return; }
-  if (t.classList.contains('addBtn')) { add(Number(t.dataset.id)); return; }
-  if (t.classList.contains('chgBtn')) { change(Number(t.dataset.id), Number(t.dataset.d)); return; }
+  if (t.classList.contains('addBtn')) { add(t.dataset.id); return; }
+  if (t.classList.contains('chgBtn')) { change(t.dataset.id, Number(t.dataset.d)); return; }
   if (t.id === 'openCartBtn') { openCart(); return; }
   if (t.id === 'back') { closeCart(); return; }
   if (t.id === 'confirm') { confirmOrder(); return; }
@@ -197,7 +208,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
 
-show('rest');
+show('مطعم');
 </script>
 </body>
 </html>
