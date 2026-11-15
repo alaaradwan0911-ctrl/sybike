@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>سيريا بايك - السائق</title>
-<link rel="manifest" href="manifest-driver.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1565c0">
 <style>
   body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; }
@@ -15,7 +16,17 @@
   #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#1565c0; color:white; font-size:17px; font-weight:bold; }
   #loginErr { color:#c62828; text-align:center; margin-top:10px; }
   #app { display:none; }
-  #logout { background:white; color:#1565c0; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; margin:10px 12px 0 12px; }
+
+  .topBtns { display:flex; gap:8px; margin:10px 12px 0 12px; }
+  .topBtns button {
+    background:white;
+    color:#1565c0;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    font-weight:bold;
+  }
+
   .me { padding:12px; }
   .me input { width:100%; box-sizing:border-box; padding:12px; font-size:16px; border-radius:8px; border:1px solid #ccc; }
   .sub { margin:0 12px 8px 12px; padding:12px; border-radius:10px; text-align:center; font-weight:bold; }
@@ -37,6 +48,7 @@
 </style>
 </head>
 <body>
+
 <header>🚲 واجهة السائق</header>
 
 <div id="loginBox">
@@ -48,15 +60,22 @@
 </div>
 
 <div id="app">
-  <button id="logout">خروج</button>
+  <div class="topBtns">
+    <button id="logout">خروج</button>
+    <button id="changeRole">تغيير الدور</button>
+  </div>
+
   <div class="me">
     <input id="driverName" placeholder="اكتب اسمك هنا (مثلاً: أحمد)">
   </div>
+
   <div id="subBar"></div>
+
   <div class="stats">
     <div class="stat">توصيلاتك<b id="count">0</b></div>
     <div class="stat">أرباحك<b id="earn">0</b></div>
   </div>
+
   <div id="orders"></div>
 </div>
 
@@ -78,22 +97,38 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const labels = {ready:'جاهز للاستلام', onway:'في الطريق للزبون'};
+const labels = {
+  ready:'جاهز للاستلام',
+  onway:'في الطريق للزبون'
+};
+
 let allOrders = [];
 let members = [];
 let started = false;
 
-function fmt(x) { return x.toLocaleString('ar-SY') + ' ل.س'; }
+function fmt(x) {
+  return x.toLocaleString('ar-SY') + ' ل.س';
+}
 
 function startListening() {
   if (started) return;
   started = true;
+
   onSnapshot(collection(db, 'orders'), function(snap) {
-    allOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+    allOrders = snap.docs.map(function(d) {
+      const o = d.data();
+      o.id = d.id;
+      return o;
+    });
     render();
   });
+
   onSnapshot(collection(db, 'members'), function(snap) {
-    members = snap.docs.map(function(d) { const m = d.data(); m.id = d.id; return m; });
+    members = snap.docs.map(function(d) {
+      const m = d.data();
+      m.id = d.id;
+      return m;
+    });
     render();
   });
 }
@@ -112,17 +147,26 @@ onAuthStateChanged(auth, function(user) {
 async function doLogin() {
   const email = document.getElementById('email').value.trim();
   const pass = document.getElementById('pass').value;
+
   document.getElementById('loginErr').textContent = '';
+
   try {
     await signInWithEmailAndPassword(auth, email, pass);
   } catch (e) {
-    document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
+    document.getElementById('loginErr').textContent =
+      'الإيميل أو كلمة السر غير صحيحة';
   }
 }
 
 function driverSub(name) {
-  const m = members.find(function(x) { return x.type === 'driver' && x.name === name; });
-  return { member: m, ok: !!(m && m.paidUntil && m.paidUntil > Date.now()) };
+  const m = members.find(function(x) {
+    return x.type === 'driver' && x.name === name;
+  });
+
+  return {
+    member: m,
+    ok: !!(m && m.paidUntil && m.paidUntil > Date.now())
+  };
 }
 
 function render() {
@@ -133,7 +177,9 @@ function render() {
     document.getElementById('subBar').innerHTML = '';
   } else if (sub.ok) {
     document.getElementById('subBar').innerHTML =
-      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(sub.member.paidUntil).toLocaleDateString('ar-SY') + '</div>';
+      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' +
+      new Date(sub.member.paidUntil).toLocaleDateString('ar-SY') +
+      '</div>';
   } else if (sub.member && sub.member.paidUntil) {
     document.getElementById('subBar').innerHTML =
       '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (5 دولار بالشهر)</div>';
@@ -145,8 +191,13 @@ function render() {
   const mineDone = allOrders.filter(function(o) {
     return o.state === 'delivered' && me && o.driver === me;
   });
+
   document.getElementById('count').textContent = mineDone.length;
-  document.getElementById('earn').textContent = fmt(mineDone.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
+
+  document.getElementById('earn').textContent =
+    fmt(mineDone.reduce(function(s, o) {
+      return s + (o.deliveryFee || 0);
+    }, 0));
 
   const list = allOrders.filter(function(o) {
     if (o.state === 'ready') return true;
@@ -155,26 +206,43 @@ function render() {
   });
 
   if (list.length === 0) {
-    document.getElementById('orders').innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>';
+    document.getElementById('orders').innerHTML =
+      '<div class="empty">لا يوجد طلبات حالياً</div>';
     return;
   }
 
   document.getElementById('orders').innerHTML = list.map(function(o) {
-    const shops = Array.from(new Set(o.items.map(function(i) { return i.shop; }))).join('، ');
+    const shops = Array.from(new Set(
+      o.items.map(function(i) { return i.shop; })
+    )).join('، ');
+
     let btn;
+
     if (o.state === 'ready') {
-      btn = '<button class="act" ' + (sub.ok ? '' : 'disabled') + ' data-id="' + o.id + '" data-s="onway">' +
-        (sub.ok ? 'استلمت الطلب' : 'الاشتراك غير مفعّل') + '</button>';
+      btn =
+        '<button class="act" ' +
+        (sub.ok ? '' : 'disabled') +
+        ' data-id="' + o.id + '" data-s="onway">' +
+        (sub.ok ? 'استلمت الطلب' : 'الاشتراك غير مفعّل') +
+        '</button>';
     } else {
-      btn = '<button class="act done" data-id="' + o.id + '" data-s="delivered">تم التوصيل</button>';
+      btn =
+        '<button class="act done" data-id="' +
+        o.id + '" data-s="delivered">تم التوصيل</button>';
     }
-    return '<div class="order"><span class="status ' + o.state + '">' + labels[o.state] + '</span>' +
+
+    return '<div class="order">' +
+      '<span class="status ' + o.state + '">' +
+      labels[o.state] + '</span>' +
       '<h3>طلب رقم ' + o.id.slice(0, 6) + '</h3>' +
       '<div class="line">🍽️ من: ' + shops + '</div>' +
       '<div class="line">👤 الزبون: ' + o.customer + '</div>' +
       '<div class="line">📍 إلى: ' + o.address + '</div>' +
-      '<div class="line">💵 المبلغ المطلوب من الزبون: ' + fmt(o.total) + '</div>' +
-      '<div class="line">🚲 أجرتك من هذا الطلب: ' + fmt(o.deliveryFee || 0) + '</div>' + btn + '</div>';
+      '<div class="line">💵 المبلغ المطلوب من الزبون: ' +
+      fmt(o.total) + '</div>' +
+      '<div class="line">🚲 أجرتك من هذا الطلب: ' +
+      fmt(o.deliveryFee || 0) + '</div>' +
+      btn + '</div>';
   }).join('');
 }
 
@@ -182,18 +250,48 @@ document.getElementById('driverName').addEventListener('input', render);
 
 document.addEventListener('click', async function(e) {
   const t = e.target;
-  if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { signOut(auth); return; }
+
+  if (t.id === 'loginBtn') {
+    doLogin();
+    return;
+  }
+
+  if (t.id === 'logout') {
+    signOut(auth);
+    return;
+  }
+
+  if (t.id === 'changeRole') {
+    localStorage.removeItem('sb_role');
+    location.href = 'index.html?choose=1';
+    return;
+  }
+
   if (!t.classList.contains('act') || t.disabled) return;
+
   const me = document.getElementById('driverName').value.trim();
-  if (!me) { alert('اكتب اسمك بالخانة فوق أولاً'); return; }
+
+  if (!me) {
+    alert('اكتب اسمك بالخانة فوق أولاً');
+    return;
+  }
+
   const data = { state: t.dataset.s };
-  if (t.dataset.s === 'onway') data.driver = me;
+
+  if (t.dataset.s === 'onway') {
+    data.driver = me;
+  }
+
   await updateDoc(doc(db, 'orders', t.dataset.id), data);
 });
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.getElementById('loginBox').style.display !== 'none') { doLogin(); }
+  if (
+    e.key === 'Enter' &&
+    document.getElementById('loginBox').style.display !== 'none'
+  ) {
+    doLogin();
+  }
 });
 </script>
 </body>
