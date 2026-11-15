@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Syria Bike Command Center</title>
-<link rel="manifest" href="manifest-admin.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#4a148c">
 <style>
   body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
@@ -15,7 +15,8 @@
   #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#4a148c; color:white; font-size:17px; font-weight:bold; }
   #loginErr { color:#c62828; text-align:center; margin-top:10px; }
   #app { display:none; }
-  #logout { background:white; color:#4a148c; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; margin:10px 12px 0 12px; }
+  .topBtns { display:flex; gap:8px; margin:10px 12px 0 12px; }
+  .topBtns button { background:white; color:#4a148c; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; }
   .stats { display:flex; flex-wrap:wrap; gap:8px; padding:12px; }
   .stat { flex:1 1 40%; background:white; border-radius:12px; padding:10px; text-align:center; font-size:14px; }
   .stat b { display:block; font-size:18px; color:#4a148c; margin-top:4px; }
@@ -39,6 +40,7 @@
   .add button { width:100%; padding:12px; border:none; border-radius:8px; background:#4a148c; color:white; font-size:16px; font-weight:bold; }
   .btn { padding:10px 14px; border:none; border-radius:8px; color:white; font-size:15px; margin-top:6px; margin-left:6px; }
   .pay { background:#2e7d32; }
+  .mail { background:#1565c0; }
   .del { background:#c62828; }
   .empty { text-align:center; color:#888; padding:30px; }
 </style>
@@ -55,7 +57,10 @@
 </div>
 
 <div id="app">
-  <button id="logout">خروج</button>
+  <div class="topBtns">
+    <button id="logout">خروج</button>
+    <button id="changeRole">تغيير الدور</button>
+  </div>
   <div class="stats">
     <div class="stat">كل الطلبات<b id="sOrders">0</b></div>
     <div class="stat">قيد التنفيذ<b id="sActive">0</b></div>
@@ -67,7 +72,17 @@
     <button id="t1" class="active" data-tab="1">الطلبات</button>
     <button id="t2" data-tab="2">المحلات والسائقين</button>
   </div>
-  <div class="box" id="box"></div>
+  <div class="box">
+    <div id="addBox" style="display:none">
+      <div class="add">
+        <input id="nm" placeholder="الاسم (مطابق لما بدك الزبون يشوفه للمحلات)">
+        <input id="em" type="email" placeholder="إيميل دخوله">
+        <select id="tp"><option value="shop">محل / مطعم (10 دولار)</option><option value="driver">سائق (5 دولار)</option></select>
+        <button data-act="addMember">إضافة</button>
+      </div>
+    </div>
+    <div id="listBox"></div>
+  </div>
 </div>
 
 <script type="module">
@@ -117,6 +132,7 @@ function startListening() {
   });
   onSnapshot(collection(db, 'members'), function(snap) {
     members = snap.docs.map(function(d) { const m = d.data(); m.id = d.id; return m; });
+    members.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
     render();
   });
 }
@@ -161,7 +177,8 @@ function render() {
   stats();
   document.getElementById('t1').className = current === 1 ? 'active' : '';
   document.getElementById('t2').className = current === 2 ? 'active' : '';
-  const box = document.getElementById('box');
+  document.getElementById('addBox').style.display = current === 2 ? 'block' : 'none';
+  const box = document.getElementById('listBox');
 
   if (current === 1) {
     if (allOrders.length === 0) { box.innerHTML = '<div class="empty">لا يوجد طلبات بعد</div>'; return; }
@@ -178,12 +195,6 @@ function render() {
     return;
   }
 
-  const form =
-    '<div class="add"><input id="nm" placeholder="الاسم (مطابق لواجهة الزبون للمحلات)">' +
-    '<input id="em" type="email" placeholder="إيميل دخوله (اختياري)">' +
-    '<select id="tp"><option value="shop">محل / مطعم (10 دولار)</option><option value="driver">سائق (5 دولار)</option></select>' +
-    '<button data-act="addMember">إضافة</button></div>';
-
   const list = members.map(function(m) {
     const active = isActive(m);
     const status = active
@@ -193,18 +204,20 @@ function render() {
     return '<div class="card">' + status +
       '<h3>' + m.name + '</h3>' +
       '<div class="line">' + (m.type === 'driver' ? '🚲 سائق' : '🍽️ محل') + ' · الاشتراك $' + fee + ' بالشهر</div>' +
-      (m.email ? '<div class="line">✉️ ' + m.email + '</div>' : '') +
+      '<div class="line">✉️ ' + (m.email || 'بدون إيميل') + '</div>' +
       '<button class="btn pay" data-act="pay" data-id="' + m.id + '">تفعيل شهر (استلمت المبلغ)</button>' +
+      '<button class="btn mail" data-act="editMail" data-id="' + m.id + '">تعديل الإيميل</button>' +
       '<button class="btn del" data-act="delMember" data-id="' + m.id + '">حذف</button></div>';
   }).join('');
 
-  box.innerHTML = form + (list || '<div class="empty">لا يوجد محلات أو سائقين بعد</div>');
+  box.innerHTML = list || '<div class="empty">لا يوجد محلات أو سائقين بعد</div>';
 }
 
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
   if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); render(); return; }
   const act = t.dataset.act;
   if (!act) return;
@@ -214,12 +227,19 @@ document.addEventListener('click', async function(e) {
     const email = document.getElementById('em').value.trim().toLowerCase();
     const type = document.getElementById('tp').value;
     if (!name) { alert('اكتب الاسم'); return; }
-    await addDoc(collection(db, 'members'), { name: name, email: email, type: type, paidUntil: 0 });
+    await addDoc(collection(db, 'members'), { name: name, email: email, type: type, paidUntil: 0, createdAt: Date.now() });
+    document.getElementById('nm').value = '';
+    document.getElementById('em').value = '';
   }
   if (act === 'pay') {
     const m = members.find(function(x) { return x.id === t.dataset.id; });
     const base = isActive(m) ? m.paidUntil : Date.now();
     await updateDoc(doc(db, 'members', m.id), { paidUntil: base + 30 * DAY });
+  }
+  if (act === 'editMail') {
+    const m = members.find(function(x) { return x.id === t.dataset.id; });
+    const v = prompt('اكتب الإيميل الجديد', m.email || '');
+    if (v !== null) { await updateDoc(doc(db, 'members', m.id), { email: v.trim().toLowerCase() }); }
   }
   if (act === 'delMember' && confirm('حذف نهائي؟')) {
     await deleteDoc(doc(db, 'members', t.dataset.id));
