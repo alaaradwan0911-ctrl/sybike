@@ -8,7 +8,17 @@
 <meta name="theme-color" content="#2e7d32">
 <style>
   body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:80px; }
-  header { background:#2e7d32; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
+  header { background:#2e7d32; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; position:relative; }
+  #roleBtn { position:absolute; left:10px; top:12px; background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 12px; border-radius:8px; font-size:13px; }
+  #chooser { display:none; padding:20px; text-align:center; }
+  #chooser h2 { color:#2e7d32; }
+  #chooser p { color:#666; }
+  .role { display:block; width:100%; padding:18px; margin-bottom:12px; border:none; border-radius:14px; color:white; font-size:20px; font-weight:bold; }
+  .r-customer { background:#2e7d32; }
+  .r-restaurant { background:#e65100; }
+  .r-driver { background:#1565c0; }
+  .r-admin { background:#4a148c; }
+  #customerApp { display:none; }
   .sections { display:flex; gap:10px; padding:12px; }
   .sections button { flex:1; padding:14px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
   .sections button.active { background:#2e7d32; color:white; }
@@ -32,28 +42,49 @@
 </style>
 </head>
 <body>
-<header>🚲 سيريا بايك</header>
 
-<div id="home">
-  <div class="sections">
-    <button id="b1" class="active" data-type="مطعم">مطاعم</button>
-    <button id="b2" data-type="سوبر ماركت">سوبر ماركت</button>
-  </div>
-  <div class="list" id="list"></div>
-  <div id="cartBar">
-    <span id="cartInfo">السلة فارغة</span>
-    <button id="openCartBtn">عرض السلة</button>
-  </div>
+<script>
+(function() {
+  var pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
+  var role = localStorage.getItem('sb_role');
+  var forceChoose = location.search.indexOf('choose=1') !== -1;
+  if (!forceChoose && role && pages[role]) { location.replace(pages[role]); }
+})();
+</script>
+
+<header>🚲 سيريا بايك<button id="roleBtn" style="display:none">تغيير الدور</button></header>
+
+<div id="chooser">
+  <h2>مين أنت؟</h2>
+  <p>اختار دورك، وبنتذكر اختيارك المرة الجاية</p>
+  <button class="role r-customer" data-role="customer">🛒 أنا زبون</button>
+  <button class="role r-restaurant" data-role="restaurant">🍽️ أنا مطعم أو متجر</button>
+  <button class="role r-driver" data-role="driver">🚲 أنا سائق</button>
+  <button class="role r-admin" data-role="admin">⚙️ أنا المدير</button>
 </div>
 
-<div id="cartPage">
-  <button id="back">→ رجوع</button>
-  <h2>سلة الطلب</h2>
-  <div id="cartItems"></div>
-  <div id="total"></div>
-  <input class="field" id="custName" placeholder="اسمك">
-  <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
-  <button id="confirm">تأكيد الطلب</button>
+<div id="customerApp">
+  <div id="home">
+    <div class="sections">
+      <button id="b1" class="active" data-type="مطعم">مطاعم</button>
+      <button id="b2" data-type="سوبر ماركت">سوبر ماركت</button>
+    </div>
+    <div class="list" id="list"></div>
+    <div id="cartBar">
+      <span id="cartInfo">السلة فارغة</span>
+      <button id="openCartBtn">عرض السلة</button>
+    </div>
+  </div>
+
+  <div id="cartPage">
+    <button id="back">→ رجوع</button>
+    <h2>سلة الطلب</h2>
+    <div id="cartItems"></div>
+    <div id="total"></div>
+    <input class="field" id="custName" placeholder="اسمك">
+    <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
+    <button id="confirm">تأكيد الطلب</button>
+  </div>
 </div>
 
 <script type="module">
@@ -72,24 +103,44 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+const pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
 let products = [];
 let loaded = false;
 let cart = {};
 let currentType = 'مطعم';
+let listening = false;
 const DELIVERY_FEE = 20000;
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
 
-onSnapshot(collection(db, 'products'), function(snap) {
-  products = snap.docs.map(function(d) { const p = d.data(); p.id = d.id; return p; });
-  loaded = true;
+function showChooser() {
+  document.getElementById('chooser').style.display = 'block';
+  document.getElementById('customerApp').style.display = 'none';
+  document.getElementById('roleBtn').style.display = 'none';
+}
+
+function showCustomer() {
+  document.getElementById('chooser').style.display = 'none';
+  document.getElementById('customerApp').style.display = 'block';
+  document.getElementById('roleBtn').style.display = 'block';
+  startProducts();
   show(currentType);
-  updateBar();
-}, function(err) {
-  loaded = true;
-  console.error(err);
-  show(currentType);
-});
+}
+
+function startProducts() {
+  if (listening) return;
+  listening = true;
+  onSnapshot(collection(db, 'products'), function(snap) {
+    products = snap.docs.map(function(d) { const p = d.data(); p.id = d.id; return p; });
+    loaded = true;
+    show(currentType);
+    updateBar();
+  }, function(err) {
+    loaded = true;
+    console.error(err);
+    show(currentType);
+  });
+}
 
 function show(type) {
   currentType = type;
@@ -196,6 +247,13 @@ async function confirmOrder() {
 
 document.addEventListener('click', function(e) {
   const t = e.target;
+  if (t.dataset.role) {
+    const r = t.dataset.role;
+    localStorage.setItem('sb_role', r);
+    if (pages[r]) { location.href = pages[r]; } else { showCustomer(); }
+    return;
+  }
+  if (t.id === 'roleBtn') { localStorage.removeItem('sb_role'); showChooser(); return; }
   if (t.dataset.type) { show(t.dataset.type); return; }
   if (t.classList.contains('addBtn')) { add(t.dataset.id); return; }
   if (t.classList.contains('chgBtn')) { change(t.dataset.id, Number(t.dataset.d)); return; }
@@ -208,7 +266,8 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
 
-show('مطعم');
+const saved = localStorage.getItem('sb_role');
+if (saved === 'customer') { showCustomer(); } else { showChooser(); }
 </script>
 </body>
 </html>
