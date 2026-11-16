@@ -3,96 +3,68 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>سيريا بايك - الزبون</title>
+<title>سيريا بايك</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#2e7d32">
+<meta name="theme-color" content="#0b3a9c">
 <style>
-  html, body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; color:#333; }
-  header { background:linear-gradient(135deg, #2e7d32, #388e3c); color:white; padding:18px 16px; text-align:center; font-size:22px; font-weight:bold; position:relative; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-  
-  #roleBtn { position:absolute; left:12px; top:14px; background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 14px; border-radius:8px; font-size:13px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-  #roleBtn:hover { background: rgba(255,255,255,0.3); }
-
-  #chooser { display:none; flex-direction:column; min-height:100vh; box-sizing:border-box; padding:24px 16px; gap:14px; background:#f8f9fa; max-width: 500px; margin: 0 auto; }
-  #chooser .logo { text-align:center; margin-top: 10px; }
-  #chooser .logo img { width:110px; height:110px; border-radius:24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-  #chooser h2 { text-align:center; font-size:26px; margin:10px 0 0 0; color:#1b5e20; }
-  #chooser p { text-align:center; font-size:15px; color:#666; margin:0 0 10px 0; }
-  
-  .role { flex:1; min-height:100px; border:none; border-radius:16px; color:white; font-size:24px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.12); transition: transform 0.1s, opacity 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 15px; }
-  .role:active { transform: scale(0.98); }
-  .role small { display:block; font-size:14px; font-weight:normal; opacity:0.9; margin-top:6px; }
-  .r-customer { background:linear-gradient(135deg, #2e7d32, #43a047); }
-  .r-restaurant { background:linear-gradient(135deg, #e65100, #f57c00); }
-  .r-driver { background:linear-gradient(135deg, #1565c0, #1976d2); }
-  .r-admin { background:linear-gradient(135deg, #4a148c, #6a1b9a); }
-
-  #authBox { display:none; max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-  #authBox h2 { text-align:center; color:#2e7d32; margin-top:0; margin-bottom: 20px; font-size: 22px; }
-  #authBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
-  #authBox input:focus { border-color: #2e7d32; outline: none; background: #fff; }
-  #authBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(46,125,50,0.3); transition: background 0.2s; margin-top: 5px; }
-  #authBox button:active { background: #1b5e20; }
-  .auth-switch { text-align: center; margin-top: 15px; font-size: 14px; color: #666; cursor: pointer; }
-  .auth-switch span { color: #2e7d32; font-weight: bold; }
-  #authErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
-
-  #customerApp { display:none; padding-bottom:90px; max-width: 600px; margin: 0 auto; }
-  
-  .sections { display:flex; gap:10px; padding:16px 16px 8px 16px; }
-  .sections button { flex:1; padding:14px; border:none; border-radius:12px; background:white; font-size:16px; font-weight:bold; color: #666; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s; }
-  .sections button.active { background:#2e7d32; color:white; box-shadow: 0 4px 12px rgba(46,125,50,0.3); }
-
-  .list { padding:8px 16px; }
-  
-  .card { background:white; border-radius:14px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); }
-  .card h3 { margin:0 0 4px 0; font-size: 18px; color: #222; }
-  .card small { color:#666; font-size: 13px; }
-  .card .price { color:#2e7d32; font-weight:bold; margin-top:6px; font-size: 16px; }
-  .card button { background:#2e7d32; color:white; border:none; padding:10px 18px; border-radius:10px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(46,125,50,0.2); transition: background 0.2s; }
-  .card button:active { background: #1b5e20; }
-
-  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin: 12px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-
-  #cartBar { position:fixed; bottom:0; left:0; right:0; background:#1b5e20; color:white; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; font-size:17px; font-weight: bold; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; box-sizing: border-box; }
-  #cartBar button { background:white; color:#1b5e20; border:none; padding:10px 18px; border-radius:10px; font-weight:bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: background 0.2s; }
-  #cartBar button:hover { background: #f1f8e9; }
-
-  #cartPage, #trackingPage { display:none; padding:16px; }
-  
-  .row { background:white; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-  .row .qty { display: flex; align-items: center; }
-  .row .qty button { width:34px; height:34px; border:none; border-radius:50%; background:#e8f5e9; color: #2e7d32; font-size:18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  .row .qty span { margin:0 12px; font-weight:bold; font-size: 16px; }
-
-  #total { background:white; border-radius:12px; padding:16px; font-size:16px; font-weight:bold; margin:16px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); line-height: 1.8; color: #444; }
-  
-  .field { width:100%; box-sizing:border-box; padding:14px; margin-bottom:12px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: white; transition: border-color 0.2s; }
-  .field:focus { border-color: #2e7d32; outline: none; }
-
-  .loc-box { display: flex; gap: 8px; margin-bottom: 12px; }
-  .loc-box input { margin-bottom: 0; flex: 1; }
-  .loc-box button { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 0 14px; border-radius: 10px; font-weight: bold; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
-  .loc-box button:hover { background: #c8e6c9; }
-
-  #confirm { width:100%; padding:14px; border:none; border-radius:12px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 12px rgba(46,125,50,0.3); transition: background 0.2s; margin-top: 5px; }
-  #confirm:active { background: #1b5e20; }
-
-  #back, #backTrack { background:none; border:none; color:#2e7d32; font-size:16px; font-weight: bold; padding:4px 0 12px 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-
-  .track-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; }
-  .track-status { font-size: 20px; font-weight: bold; color: #1565c0; margin: 15px 0; }
-  .map-btn { display: inline-block; width: 100%; padding: 14px; background: #1565c0; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 10px rgba(21,101,192,0.3); }
-
-  .logout-user { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; float: left; }
-
-  /* تصميم التنبيهات العائمة (Toast Notifications) الاحترافية */
-  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
-  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-  #toast.success { background: #2e7d32; }
-  #toast.error { background: #c62828; }
+  html, body { margin:0; }
+  body { font-family:Arial,sans-serif; background:#f4f4f4; }
+  header { background:#2e7d32; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; position:relative; display:none; }
+  #roleBtn { position:absolute; left:10px; top:12px; background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 12px; border-radius:8px; font-size:13px; }
+  #logoutBtn { position:absolute; right:10px; top:12px; background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 12px; border-radius:8px; font-size:13px; }
+  #loading { text-align:center; color:#888; padding:60px 20px; }
+  #chooser { display:none; flex-direction:column; min-height:100vh; box-sizing:border-box; padding:20px 16px; gap:14px; background:white; }
+  #chooser .logo { text-align:center; }
+  #chooser .logo img { width:110px; height:110px; border-radius:24px; }
+  #chooser h2 { text-align:center; font-size:28px; margin:4px 0 0 0; color:#0b3a9c; }
+  #chooser p { text-align:center; font-size:17px; color:#555; margin:0 0 4px 0; }
+  .role { flex:1; min-height:110px; border:none; border-radius:20px; color:white; font-size:28px; font-weight:bold; }
+  .role small { display:block; font-size:16px; font-weight:normal; opacity:0.9; margin-top:6px; }
+  .r-customer { background:#2e7d32; }
+  .r-restaurant { background:#e65100; }
+  .r-driver { background:#1565c0; }
+  .r-admin { background:#4a148c; }
+  #authBox { display:none; padding:20px; }
+  #authBox h2 { text-align:center; color:#2e7d32; }
+  #authBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  #authSubmit { width:100%; padding:14px; border:none; border-radius:10px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; }
+  #authToggle { background:none; border:none; color:#2e7d32; font-size:15px; padding:14px; width:100%; }
+  #authErr { color:#c62828; text-align:center; margin-top:8px; }
+  #customerApp { display:none; }
+  .sections { display:flex; gap:10px; padding:12px; }
+  .sections button { flex:1; padding:14px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
+  .sections button.active { background:#2e7d32; color:white; }
+  .list { padding:12px; padding-bottom:90px; }
+  .card { background:white; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+  .card h3 { margin:0 0 4px 0; }
+  .card small { color:#666; }
+  .card .price { color:#2e7d32; font-weight:bold; margin-top:4px; }
+  .card button { background:#2e7d32; color:white; border:none; padding:10px 16px; border-radius:8px; }
+  .empty { text-align:center; color:#888; padding:30px; }
+  #cartBar { position:fixed; bottom:0; left:0; right:0; background:#1b5e20; color:white; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; font-size:16px; gap:8px; }
+  #cartBar button { background:white; color:#1b5e20; border:none; padding:10px 14px; border-radius:8px; font-weight:bold; }
+  #cartPage, #trackPage { display:none; padding:12px; }
+  .row { background:white; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+  .row .qty button { width:32px; height:32px; border:none; border-radius:50%; background:#c8e6c9; font-size:18px; }
+  .row .qty span { margin:0 10px; font-weight:bold; }
+  #total { background:white; border-radius:10px; padding:14px; font-size:18px; font-weight:bold; margin:12px 0; }
+  .field { width:100%; box-sizing:border-box; padding:12px; margin-bottom:8px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  #locBtn { width:100%; padding:12px; margin-bottom:8px; border:1px solid #2e7d32; border-radius:8px; background:white; color:#2e7d32; font-size:16px; font-weight:bold; }
+  #locInfo { color:#2e7d32; margin-bottom:8px; font-size:14px; }
+  #confirm { width:100%; padding:14px; border:none; border-radius:10px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; }
+  #confirm:disabled { background:#bbb; }
+  .back { background:none; border:none; color:#2e7d32; font-size:16px; padding:8px; }
+  .ord { background:white; border-radius:12px; padding:14px; margin-bottom:10px; }
+  .ord h3 { margin:0 0 8px 0; }
+  .ord .line { padding:3px 0; color:#444; }
+  .st { display:inline-block; padding:4px 12px; border-radius:20px; font-size:14px; margin-bottom:8px; background:#e0e0e0; }
+  .st-new { background:#ffe0b2; color:#e65100; }
+  .st-cooking { background:#fff9c4; color:#f57f17; }
+  .st-ready { background:#bbdefb; color:#1565c0; }
+  .st-onway { background:#e1bee7; color:#6a1b9a; }
+  .st-delivered { background:#c8e6c9; color:#2e7d32; }
 </style>
 </head>
 <body>
@@ -106,13 +78,13 @@
 })();
 </script>
 
-<div id="toast"></div>
-
-<header id="topHeader" style="display:none">
-  🚲 سيريا بايك 
+<header id="topHeader">
+  <button id="logoutBtn">خروج</button>
+  🚲 سيريا بايك
   <button id="roleBtn">تغيير الدور</button>
-  <button id="logoutUserBtn" class="logout-user" style="display:none;">خروج</button>
 </header>
+
+<div id="loading">جاري التحميل...</div>
 
 <div id="chooser">
   <div class="logo"><img src="logo.png" alt="Sybike" onerror="this.style.display='none'"></div>
@@ -126,12 +98,11 @@
 
 <div id="authBox">
   <h2 id="authTitle">تسجيل دخول الزبون</h2>
-  <input id="authName" class="field" type="text" placeholder="اسمك الكامل" style="display:none;">
-  <input id="authEmail" class="field" type="email" placeholder="الإيميل">
-  <input id="authPass" class="field" type="password" placeholder="كلمة السر">
-  <button id="authSubmitBtn">دخول</button>
+  <input id="aEmail" type="email" placeholder="الإيميل">
+  <input id="aPass" type="password" placeholder="كلمة السر">
+  <button id="authSubmit">دخول</button>
   <div id="authErr"></div>
-  <div class="auth-switch" id="authSwitchText">ليس لديك حساب؟ <span id="authToggleBtn">سجل الآن</span></div>
+  <button id="authToggle">ليس لديك حساب؟ سجل الآن</button>
 </div>
 
 <div id="customerApp">
@@ -143,38 +114,36 @@
     <div class="list" id="list"></div>
     <div id="cartBar">
       <span id="cartInfo">السلة فارغة</span>
-      <button id="openCartBtn">عرض السلة</button>
+      <span>
+        <button id="trackBtn">📦 طلباتي</button>
+        <button id="openCartBtn">عرض السلة</button>
+      </span>
     </div>
   </div>
 
   <div id="cartPage">
-    <button id="back">← رجوع</button>
+    <button class="back" id="backHome">→ رجوع</button>
     <h2>سلة الطلب</h2>
     <div id="cartItems"></div>
     <div id="total"></div>
-    <div class="loc-box">
-      <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
-      <button id="getLocBtn" type="button">📍 حدد موقعي</button>
-    </div>
+    <input class="field" id="custName" placeholder="اسمك">
+    <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
+    <button id="locBtn">📍 حدد موقعي</button>
+    <div id="locInfo"></div>
     <button id="confirm">تأكيد الطلب</button>
   </div>
 
-  <div id="trackingPage">
-    <button id="backTrack">← رجوع للرئيسية</button>
+  <div id="trackPage">
+    <button class="back" id="backHome2">→ رجوع للرئيسية</button>
     <h2>تتبع الطلب</h2>
-    <div class="track-card">
-      <div id="trackOrderNum" style="color:#666;"></div>
-      <div class="track-status" id="trackStatus">جاري متابعة الحالة...</div>
-      <div id="driverInfo" style="margin-top:10px; font-weight:bold; color:#333;"></div>
-      <div id="mapContainer"></div>
-    </div>
+    <div id="trackList"></div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -190,76 +159,122 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
-const stateLabels = {
-  'new': '⏳ بانتظار موافقة المطعم',
-  'ready': '🍳 الطلب قيد التحضير / جاهز للاستلاستلام',
-  'onway': '🚴 السائق في الطريق إليك!',
-  'delivered': '✅ تم توصيل الطلب بنجاح'
-};
+const STATES = { new:'تم استلام طلبك', cooking:'قيد التحضير', ready:'جاهز، بانتظار السائق', onway:'السائق بالطريق إليك', delivered:'تم التوصيل' };
+const DELIVERY_FEE = 20000;
 
 let products = [];
 let loaded = false;
 let cart = {};
 let currentType = 'مطعم';
-let listening = false;
-let customerCoords = null;
-let activeOrderUnsub = null;
-let isRegisterMode = false;
-let currentUserName = '';
-const DELIVERY_FEE = 20000;
+let currentUser = null;
+let authReady = false;
+let registerMode = false;
+let loc = null;
+let myOrders = [];
+let ordersUnsub = null;
+let productsStarted = false;
 
+function $(id) { return document.getElementById(id); }
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
-
-// دالة التنبيهات العائمة (Toast) الاحترافية بدلاً من الـ alert
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = 'show ' + type;
-  setTimeout(function() {
-    toast.className = '';
-  }, 3000);
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
 }
 
-function showChooser() {
-  document.getElementById('chooser').style.display = 'flex';
-  document.getElementById('topHeader').style.display = 'none';
-  document.getElementById('authBox').style.display = 'none';
-  document.getElementById('customerApp').style.display = 'none';
+function hideAll() {
+  $('loading').style.display = 'none';
+  $('chooser').style.display = 'none';
+  $('authBox').style.display = 'none';
+  $('customerApp').style.display = 'none';
+  $('topHeader').style.display = 'none';
 }
+
+function showChooser() { hideAll(); $('chooser').style.display = 'flex'; }
 
 function showAuth() {
-  document.getElementById('chooser').style.display = 'none';
-  document.getElementById('topHeader').style.display = 'block';
-  document.getElementById('authBox').style.display = 'block';
-  document.getElementById('customerApp').style.display = 'none';
-  document.getElementById('logoutUserBtn').style.display = 'none';
+  hideAll();
+  $('topHeader').style.display = 'block';
+  $('logoutBtn').style.display = 'none';
+  $('authBox').style.display = 'block';
+  renderAuthMode();
 }
 
 function showCustomer() {
-  document.getElementById('chooser').style.display = 'none';
-  document.getElementById('authBox').style.display = 'none';
-  document.getElementById('topHeader').style.display = 'block';
-  document.getElementById('customerApp').style.display = 'block';
-  document.getElementById('logoutUserBtn').style.display = 'inline-block';
+  hideAll();
+  $('topHeader').style.display = 'block';
+  $('logoutBtn').style.display = 'block';
+  $('customerApp').style.display = 'block';
   startProducts();
+  showView('home');
   show(currentType);
 }
 
-onAuthStateChanged(auth, function(user) {
-  const savedRole = localStorage.getItem('sb_role');
-  if (savedRole === 'customer') {
-    if (user) {
-      currentUserName = user.displayName || user.email.split('@')[0];
-      showCustomer();
-    } else {
-      showAuth();
-    }
+function route() {
+  const r = localStorage.getItem('sb_role');
+  if (r !== 'customer') { showChooser(); return; }
+  if (!authReady) return;
+  if (currentUser) { showCustomer(); } else { showAuth(); }
+}
+
+function showView(name) {
+  $('home').style.display = name === 'home' ? 'block' : 'none';
+  $('cartPage').style.display = name === 'cart' ? 'block' : 'none';
+  $('trackPage').style.display = name === 'track' ? 'block' : 'none';
+  if (name === 'track') renderTrack();
+  window.scrollTo(0, 0);
+}
+
+function renderAuthMode() {
+  $('authTitle').textContent = registerMode ? 'إنشاء حساب جديد' : 'تسجيل دخول الزبون';
+  $('authSubmit').textContent = registerMode ? 'إنشاء الحساب' : 'دخول';
+  $('authToggle').textContent = registerMode ? 'عندك حساب؟ سجل دخولك' : 'ليس لديك حساب؟ سجل الآن';
+  $('authErr').textContent = '';
+}
+
+async function doAuth() {
+  const email = $('aEmail').value.trim();
+  const pass = $('aPass').value;
+  $('authErr').textContent = '';
+  if (!email || !pass) { $('authErr').textContent = 'اكتب الإيميل وكلمة السر'; return; }
+  try {
+    if (registerMode) { await createUserWithEmailAndPassword(auth, email, pass); }
+    else { await signInWithEmailAndPassword(auth, email, pass); }
+  } catch (e) {
+    const c = e && e.code ? e.code : '';
+    let msg = 'صار خطأ، جرب مرة ثانية';
+    if (c === 'auth/email-already-in-use') msg = 'هذا الإيميل مستخدم من قبل';
+    else if (c === 'auth/weak-password') msg = 'كلمة السر ضعيفة (6 أحرف على الأقل)';
+    else if (c === 'auth/invalid-email') msg = 'الإيميل غير صحيح';
+    else if (c === 'auth/invalid-credential' || c === 'auth/wrong-password' || c === 'auth/user-not-found') msg = 'الإيميل أو كلمة السر غير صحيحة';
+    $('authErr').textContent = msg;
   }
+}
+
+function startOrders(uid) {
+  if (ordersUnsub) ordersUnsub();
+  ordersUnsub = onSnapshot(query(collection(db, 'orders'), where('customerUid', '==', uid)), function(snap) {
+    myOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+    renderTrack();
+  }, function(err) { console.error(err); });
+}
+
+function stopOrders() {
+  if (ordersUnsub) ordersUnsub();
+  ordersUnsub = null;
+  myOrders = [];
+}
+
+onAuthStateChanged(auth, function(user) {
+  currentUser = user;
+  authReady = true;
+  if (user) { startOrders(user.uid); } else { stopOrders(); }
+  route();
 });
 
 function startProducts() {
-  if (listening) return;
-  listening = true;
+  if (productsStarted) return;
+  productsStarted = true;
   onSnapshot(collection(db, 'products'), function(snap) {
     products = snap.docs.map(function(d) { const p = d.data(); p.id = d.id; return p; });
     loaded = true;
@@ -274,29 +289,19 @@ function startProducts() {
 
 function show(type) {
   currentType = type;
-  document.getElementById('b1').className = type === 'مطعم' ? 'active' : '';
-  document.getElementById('b2').className = type === 'سوبر ماركت' ? 'active' : '';
+  $('b1').className = type === 'مطعم' ? 'active' : '';
+  $('b2').className = type === 'سوبر ماركت' ? 'active' : '';
   const list = products.filter(function(p) { return p.type === type; });
-  if (!loaded) {
-    document.getElementById('list').innerHTML = '<div class="empty">جاري التحميل...</div>';
-    return;
-  }
-  if (list.length === 0) {
-    document.getElementById('list').innerHTML = '<div class="empty">لا يوجد منتجات حالياً، تابعنا قريباً</div>';
-    return;
-  }
-  document.getElementById('list').innerHTML = list.map(function(i) {
-    return '<div class="card"><div><h3>' + i.n + '</h3><small>' + i.shop + '</small>' +
+  if (!loaded) { $('list').innerHTML = '<div class="empty">جاري التحميل...</div>'; return; }
+  if (list.length === 0) { $('list').innerHTML = '<div class="empty">لا يوجد منتجات حالياً، تابعنا قريباً</div>'; return; }
+  $('list').innerHTML = list.map(function(i) {
+    return '<div class="card"><div><h3>' + esc(i.n) + '</h3><small>' + esc(i.shop) + '</small>' +
       '<div class="price">' + fmt(i.p) + '</div></div>' +
-      '<button class="addBtn" data-id="' + i.id + '">أضف</button></div>';
+      '<button class="addBtn" data-id="' + esc(i.id) + '">أضف</button></div>';
   }).join('');
 }
 
-function add(id) { 
-  cart[id] = (cart[id] || 0) + 1; 
-  updateBar();
-  showToast('تمت إضافة المنتج للسلة');
-}
+function add(id) { cart[id] = (cart[id] || 0) + 1; updateBar(); }
 
 function change(id, d) {
   cart[id] = (cart[id] || 0) + d;
@@ -305,9 +310,7 @@ function change(id, d) {
   updateBar();
 }
 
-function cartItems() {
-  return products.filter(function(p) { return cart[p.id]; });
-}
+function cartItems() { return products.filter(function(p) { return cart[p.id]; }); }
 
 function totals() {
   let count = 0, sum = 0;
@@ -317,154 +320,95 @@ function totals() {
 
 function updateBar() {
   const t = totals();
-  document.getElementById('cartInfo').textContent =
-    t.count === 0 ? 'السلة فارغة' : t.count + ' عناصر · ' + fmt(t.sum);
+  $('cartInfo').textContent = t.count === 0 ? 'السلة فارغة' : t.count + ' عناصر · ' + fmt(t.sum);
 }
 
 function renderCart() {
   const rows = cartItems().map(function(i) {
-    return '<div class="row"><div><b>' + i.n + '</b><br><small>' + i.shop + ' · ' + fmt(i.p) + '</small></div>' +
-      '<div class="qty"><button class="chgBtn" data-id="' + i.id + '" data-d="1">+</button>' +
+    return '<div class="row"><div><b>' + esc(i.n) + '</b><br><small>' + esc(i.shop) + ' · ' + fmt(i.p) + '</small></div>' +
+      '<div class="qty"><button class="chgBtn" data-id="' + esc(i.id) + '" data-d="1">+</button>' +
       '<span>' + cart[i.id] + '</span>' +
-      '<button class="chgBtn" data-id="' + i.id + '" data-d="-1">−</button></div></div>';
+      '<button class="chgBtn" data-id="' + esc(i.id) + '" data-d="-1">−</button></div></div>';
   }).join('');
-  document.getElementById('cartItems').innerHTML = rows || '<p style="text-align:center; color:#888; padding:20px;">السلة فارغة</p>';
+  $('cartItems').innerHTML = rows || '<p>السلة فارغة</p>';
   const t = totals();
   const fee = t.count ? DELIVERY_FEE : 0;
-  document.getElementById('total').innerHTML =
-    'المشتريات: ' + fmt(t.sum) + '<br>أجرة التوصيل: ' + fmt(fee) + '<br><span style="color:#2e7d32;">المجموع الكلي: ' + fmt(t.sum + fee) + '</span>';
+  $('total').innerHTML = 'المشتريات: ' + fmt(t.sum) + '<br>أجرة التوصيل: ' + fmt(fee) + '<br>المجموع: ' + fmt(t.sum + fee);
 }
 
-function openCart() {
-  document.getElementById('home').style.display = 'none';
-  document.getElementById('trackingPage').style.display = 'none';
-  document.getElementById('cartPage').style.display = 'block';
-  renderCart();
+function locate() {
+  if (!navigator.geolocation) { alert('جهازك ما بيدعم تحديد الموقع، اكتب العنوان يدوياً'); return; }
+  $('locInfo').textContent = 'جاري تحديد موقعك...';
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    $('locInfo').textContent = '✅ تم تحديد موقعك';
+  }, function() {
+    loc = null;
+    $('locInfo').textContent = '';
+    alert('ما قدرنا نحدد موقعك، اكتب العنوان يدوياً');
+  }, { enableHighAccuracy: true, timeout: 10000 });
 }
 
-function closeCart() {
-  document.getElementById('cartPage').style.display = 'none';
-  document.getElementById('trackingPage').style.display = 'none';
-  document.getElementById('home').style.display = 'block';
-}
-
-function getMyLocation() {
-  if (!navigator.geolocation) {
-    showToast('متصفحك لا يدعم تحديد الموقع', 'error');
-    return;
-  }
-  const btn = document.getElementById('getLocBtn');
-  btn.textContent = 'جاري التحديد...';
-  navigator.geolocation.getCurrentPosition(
-    function(position) {
-      customerCoords = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
-      document.getElementById('custAddr').value = 'الموقع الحالي (تم التقاط الإحداثيات)';
-      btn.textContent = '📍 تم التحديد';
-      showToast('تم تحديد موقعك بنجاح');
-      setTimeout(function() { btn.textContent = '📍 حدد موقعي'; }, 3000);
-    },
-    function(error) {
-      showToast('تعذر تحديد الموقع، تحقق من الصلاحيات', 'error');
-      btn.textContent = '📍 حدد موقعي';
-    },
-    { enableHighAccuracy: true }
-  );
-}
-
-function startTrackingOrder(orderId) {
-  document.getElementById('home').style.display = 'none';
-  document.getElementById('cartPage').style.display = 'none';
-  document.getElementById('trackingPage').style.display = 'block';
-  document.getElementById('trackOrderNum').textContent = 'رقم الطلب: ' + orderId.slice(0, 6);
-
-  if (activeOrderUnsub) activeOrderUnsub();
-
-  activeOrderUnsub = onSnapshot(doc(db, 'orders', orderId), function(docSnap) {
-    if (!docSnap.exists()) return;
-    const data = docSnap.data();
-    
-    document.getElementById('trackStatus').textContent = stateLabels[data.state] || data.state;
-    
-    if (data.driver) {
-      document.getElementById('driverInfo').textContent = 'السائق: 🚲 ' + data.driver;
-    } else {
-      document.getElementById('driverInfo').textContent = '';
-    }
-
-    const mapBox = document.getElementById('mapContainer');
-    if (data.state === 'onway' && data.driverLocation) {
-      const lat = data.driverLocation.lat;
-      const lng = data.driverLocation.lng;
-      const mapsUrl = 'https://www.google.com/maps?q=' + lat + ',' + lng;
-      mapBox.innerHTML = '<a href="' + mapsUrl + '" target="_blank" class="map-btn">📍 عرض موقع السائق المباشر على الخريطة</a>';
-    } else {
-      mapBox.innerHTML = '';
-    }
+function renderTrack() {
+  const box = $('trackList');
+  if (!myOrders.length) { box.innerHTML = '<div class="empty">لا يوجد طلبات بعد</div>'; return; }
+  const list = myOrders.slice().sort(function(a, b) {
+    const ta = a.createdAt ? a.createdAt.seconds : 9999999999;
+    const tb = b.createdAt ? b.createdAt.seconds : 9999999999;
+    return tb - ta;
   });
-}
-
-async function handleAuth() {
-  const email = document.getElementById('authEmail').value.trim();
-  const pass = document.getElementById('authPass').value;
-  const name = document.getElementById('authName').value.trim();
-  const errDiv = document.getElementById('authErr');
-  errDiv.textContent = '';
-
-  if (!email || !pass || (isRegisterMode && !name)) {
-    errDiv.textContent = 'الرجاء تعبئة كافة الحقول المطلوبة';
-    return;
-  }
-
-  try {
-    if (isRegisterMode) {
-      await createUserWithEmailAndPassword(auth, email, pass);
-      currentUserName = name;
-      showToast('تم إنشاء الحساب وتسجيل الدخول بنجاح');
-    } else {
-      await signInWithEmailAndPassword(auth, email, pass);
-      showToast('مرحباً بك مجدداً');
-    }
-  } catch (e) {
-    errDiv.textContent = 'خطأ في البيانات المدخلة، تأكد من صحة الإيميل أو كلمة السر';
-    console.error(e);
-  }
+  box.innerHTML = list.map(function(o) {
+    const shops = (o.shops || []).map(esc).join('، ');
+    const drv = o.driver ? '<div class="line">🚲 السائق: ' + esc(o.driver) + '</div>' : '';
+    return '<div class="ord"><span class="st st-' + esc(o.state) + '">' + esc(STATES[o.state] || o.state) + '</span>' +
+      '<h3>طلب رقم ' + esc(o.id.slice(0, 6)) + '</h3>' +
+      '<div class="line">🍽️ ' + shops + '</div>' +
+      '<div class="line">💵 ' + fmt(o.total || 0) + '</div>' + drv + '</div>';
+  }).join('');
 }
 
 async function confirmOrder() {
-  const addr = document.getElementById('custAddr').value.trim();
-  if (totals().count === 0) { showToast('السلة فارغة', 'error'); return; }
-  if (!addr) { showToast('الرجاء كتابة أو تحديد عنوانك', 'error'); return; }
+  if (!currentUser) { alert('سجّل دخولك أولاً'); return; }
+  const name = $('custName').value.trim();
+  const addr = $('custAddr').value.trim();
+  if (totals().count === 0) { alert('السلة فارغة'); return; }
+  if (!name || !addr) { alert('اكتب اسمك وعنوانك'); return; }
 
-  const items = cartItems().map(function(i) {
-    return {n: i.n, shop: i.shop, q: cart[i.id], p: i.p};
-  });
+  const list = cartItems();
+  const items = list.map(function(i) { return {n: i.n, shop: i.shop, q: cart[i.id], p: i.p}; });
+  const shops = Array.from(new Set(list.map(function(i) { return i.shop; })));
+  const sum = totals().sum;
+  const order = {
+    customer: name,
+    address: addr,
+    items: items,
+    shops: shops,
+    customerUid: currentUser.uid,
+    subtotal: sum,
+    deliveryFee: DELIVERY_FEE,
+    total: sum + DELIVERY_FEE,
+    state: 'new',
+    createdAt: serverTimestamp()
+  };
+  if (loc) { order.lat = loc.lat; order.lng = loc.lng; }
 
+  const btn = $('confirm');
+  btn.disabled = true;
   try {
-    const ref = await addDoc(collection(db, 'orders'), {
-      customer: currentUserName || auth.currentUser.email,
-      customerEmail: auth.currentUser.email,
-      address: addr,
-      location: customerCoords || null,
-      items: items,
-      subtotal: totals().sum,
-      deliveryFee: DELIVERY_FEE,
-      total: totals().sum + DELIVERY_FEE,
-      state: 'new',
-      createdAt: serverTimestamp()
-    });
+    const ref = await addDoc(collection(db, 'orders'), order);
+    alert('تم استلام طلبك! رقم الطلب: ' + ref.id.slice(0, 6));
     cart = {};
-    customerCoords = null;
-    document.getElementById('custAddr').value = '';
+    $('custName').value = '';
+    $('custAddr').value = '';
+    $('locInfo').textContent = '';
+    loc = null;
     updateBar();
-    showToast('تم إرسال طلبك بنجاح!');
-    startTrackingOrder(ref.id);
+    showView('track');
   } catch (e) {
-    showToast('حدث خطأ، حاول مرة أخرى', 'error');
+    alert('صار خطأ، جرب مرة ثانية');
     console.error(e);
   }
+  btn.disabled = false;
 }
 
 document.addEventListener('click', function(e) {
@@ -473,60 +417,32 @@ document.addEventListener('click', function(e) {
   if (rb) {
     const r = rb.dataset.role;
     localStorage.setItem('sb_role', r);
-    if (pages[r]) { 
-      location.href = pages[r]; 
-    } else { 
-      showAuth(); 
-    }
+    if (pages[r]) { location.href = pages[r]; } else { route(); }
     return;
   }
-  if (t.id === 'roleBtn') { 
-    localStorage.removeItem('sb_role'); 
-    showChooser(); 
-    return; 
-  }
-  if (t.id === 'logoutUserBtn') {
-    signOut(auth);
-    showAuth();
-    showToast('تم تسجيل الخروج');
-    return;
-  }
-  if (t.id === 'authToggleBtn') {
-    isRegisterMode = !isRegisterMode;
-    document.getElementById('authTitle').textContent = isRegisterMode ? 'إنشاء حساب جديد' : 'تسجيل دخول الزبون';
-    document.getElementById('authName').style.display = isRegisterMode ? 'block' : 'none';
-    document.getElementById('authSubmitBtn').textContent = isRegisterMode ? 'تسجيل حساب' : 'دخول';
-    document.getElementById('authSwitchText').innerHTML = isRegisterMode ? 
-      'لديك حساب بالفعل؟ <span id="authToggleBtn">سجل دخولك</span>' : 
-      'ليس لديك حساب؟ <span id="authToggleBtn">سجل الآن</span>';
-    return;
-  }
-  if (t.id === 'authSubmitBtn') { handleAuth(); return; }
+  if (t.id === 'roleBtn') { localStorage.removeItem('sb_role'); route(); return; }
+  if (t.id === 'logoutBtn') { signOut(auth); return; }
+  if (t.id === 'authSubmit') { doAuth(); return; }
+  if (t.id === 'authToggle') { registerMode = !registerMode; renderAuthMode(); return; }
   if (t.dataset.type) { show(t.dataset.type); return; }
   if (t.classList.contains('addBtn')) { add(t.dataset.id); return; }
   if (t.classList.contains('chgBtn')) { change(t.dataset.id, Number(t.dataset.d)); return; }
-  if (t.id === 'openCartBtn') { openCart(); return; }
-  if (t.id === 'back' || t.id === 'backTrack') { closeCart(); return; }
-  if (t.id === 'getLocBtn') { getMyLocation(); return; }
+  if (t.id === 'openCartBtn') { showView('cart'); renderCart(); return; }
+  if (t.id === 'trackBtn') { showView('track'); return; }
+  if (t.id === 'backHome' || t.id === 'backHome2') { showView('home'); return; }
+  if (t.id === 'locBtn') { locate(); return; }
   if (t.id === 'confirm') { confirmOrder(); return; }
 });
 
-document.getElementById('authPass').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') handleAuth();
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && $('authBox').style.display === 'block') { doAuth(); }
 });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
 
-const saved = localStorage.getItem('sb_role');
-if (saved === 'customer') {
-  onAuthStateChanged(auth, function(user) {
-    if (!user) showAuth();
-  });
-} else {
-  showChooser();
-}
+if (localStorage.getItem('sb_role') !== 'customer') { route(); }
 </script>
 </body>
 </html>
