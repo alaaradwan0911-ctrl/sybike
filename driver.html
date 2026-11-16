@@ -155,4 +155,161 @@ async function doLogin() {
   }
 }
 
-function startTracking
+function startTracking(orderId) {
+  if (watchId !== null) return;
+  if (!navigator.geolocation) return;
+
+  watchId = navigator.geolocation.watchPosition(
+    async function(pos) {
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      try {
+        await updateDoc(doc(db, 'orders', orderId), { driverLocation: coords });
+      } catch (err) {
+        console.error("خطأ في تحديث موقع السائق:", err);
+      }
+    },
+    function(err) {
+      console.error("خطأ في تحديد موقع GPS:", err);
+    },
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+  );
+}
+
+function stopTracking() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+}
+
+async function updateState(id, newState, currentDriverName) {
+  try {
+    const updateData = { state: newState };
+    if (newState === 'onway') {
+      updateData.driver = currentDriverName;
+      updateData.driverEmail = myEmail;
+      startTracking(id);
+    } else if (newState === 'delivered') {
+      stopTracking();
+    }
+    await updateDoc(doc(db, 'orders', id), updateData);
+  } catch (e) {
+    alert('حدث خطأ أثناء تحديث حالة الطلب');
+    console.error(e);
+  }
+}
+
+function render() {
+  const drv = myDriver();
+  const ordersBox = document.getElementById('orders');
+
+  if (!drv) {
+    document.getElementById('who').textContent = '';
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي سائق. تواصل مع الإدارة.</div>';
+    document.getElementById('count').textContent = '0';
+    document.getElementById('earn').textContent = fmt(0);
+    ordersBox.innerHTML = '';
+    return;
+  }
+
+  const me = drv.name;
+  const ok = !!(drv.paidUntil && drv.paidUntil > Date.now());
+  document.getElementById('who').textContent = '🚲 ' + me;
+
+  if (ok) {
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(drv.paidUntil).toLocaleDateString('ar-SY') + '</div>';
+  } else if (drv.paidUntil) {
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (5 دولار بالشهر)</div>';
+  } else {
+    document.getElementById('subBar').innerHTML =
+      '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (5 دولار بالشهر)</div>';
+  }
+
+  function isMine(o) { return o.driverEmail === myEmail || (!o.driverEmail && o.driver === me); }
+
+  const mineDone = allOrders.filter(function(o) { return o.state === 'delivered' && isMine(o); });
+  document.getElementById('count').textContent = mineDone.length;
+  document.getElementById('earn').textContent = fmt(mineDone.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
+
+  const list = allOrders.filter(function(o) {
+    if (o.state === 'ready') return true;
+    if ((o.state === 'onway' || o.state === 'delivered') && isMine(o)) return true;
+    return false;
+  });
+
+  if (list.length === 0) {
+    ordersBox.innerHTML = '<div class="empty">لا توجد طلبات متاحة حالياً</div>';
+    return;
+  }
+
+  ordersBox.innerHTML = list.map(function(o) {
+    const itemsHtml = (o.items || []).map(function(i) {
+      return '<div class="line">' + esc(i.n) + ' (×' + i.q + ') - ' + esc(i.shop) + '</div>';
+    }).join('');
+
+    let btnHtml = '';
+    let statusClass = 'ready';
+    let statusText = labels[o.state] || o.state;
+
+    if (o.state === 'ready') {
+      btnHtml = '<button class="takeBtn" data-id="' + o.id + '" ' + (!ok ? 'disabled' : '') + '>استلام الطلب والتوجه للزبون</button>';
+      if (!ok) btnHtml += '<p style="color:#c62828; font-size:12px; text-align:center; margin-top:6px;">عليك تفعيل الاشتراك لاستلام الطلبات</p>';
+    } else if (o.state === 'onway') {
+      statusClass = 'onway';
+      btnHtml = '<button class="done doneBtn" data-id="' + o.id + '">تم التوصيل بنجاح</button>';
+    } else {
+      statusText = 'تم التوصيل';
+      btnHtml = '<button disabled style="background:#e0e0e0; color:#666;">منتهي</button>';
+    }
+
+    return '<div class="order">' +
+      '<div class="status ' + statusClass + '">' + statusText + '</div>' +
+      '<h3>طلب للزبون: ' + esc(o.customer) + '</h3>' +
+      '<div class="line"><b>العنوان:</b> ' + esc(o.address) + '</div>' +
+      '<div class="line"><b>أجرة التوصيل:</b> ' + fmt(o.deliveryFee) + '</div>' +
+      '<div style="margin-top:10px; font-weight:bold; font-size:14px; color:#555;">الأصناف:</div>' +
+      itemsHtml +
+      btnHtml +
+    '</div>';
+  }).join('');
+}
+
+document.addEventListener('click', function(e) {
+  const t = e.target;
+  if (t.id === 'loginBtn') { doLogin(); return; }
+  if (t.id === 'logout') { signOut(auth); stopTracking(); return; }
+  if (t.id === 'changeRole') { 
+    localStorage.removeItem('sb_role'); 
+    location.href = 'index.html?choose=1'; 
+    return; 
+  }
+  
+  if (t.classList.contains('takeBtn')) {
+    const drv = myDriver();
+    if (!drv || !(drv.paidUntil && drv.paidUntil > Date.now())) {
+      alert('يجب تفعيل اشتراكك أولاً لتتمكن من استلام الطلبات');
+      return;
+    }
+    updateState(t.dataset.id, 'onway', drv.name);
+    return;
+  }
+  
+  if (t.classList.contains('doneBtn')) {
+    updateState(t.dataset.id, 'delivered');
+    return;
+  }
+});
+
+document.getElementById('pass').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
