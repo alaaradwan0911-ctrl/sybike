@@ -1,8 +1,10 @@
 {
+  "id": "/syria-bike-admin",
   "name": "لوحة إدارة سيريا بايك",
   "short_name": "إدارة سيريا بايك",
   "description": "لوحة التحكم الخاصة بمدير النظام",
   "start_url": "ctrl.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#4a148c",
   "theme_color": "#4a148c",
