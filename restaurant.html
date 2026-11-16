@@ -8,9 +8,15 @@
 <meta name="theme-color" content="#e65100">
 <style>
   body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
-  header { background:linear-gradient(135deg, #e65100, #f57c00); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  header { background:linear-gradient(135deg, #e65100, #f57c00); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
+  header span { flex: 1; text-align: center; }
+
+  /* زر تغيير الدور العلوي الدائم قبل وبعد تسجيل الدخول */
+  .global-top-bar { padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
+  #changeRoleGlobal { background: white; color: #555; border: 1px solid #ddd; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+  #changeRoleGlobal:hover { background: #f1f3f5; }
   
-  #loginBox { max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  #loginBox { max-width: 400px; margin: 30px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
   #loginBox h2 { text-align:center; color:#e65100; margin-top:0; margin-bottom: 20px; font-size: 20px; }
   #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
   #loginBox input:focus { border-color: #e65100; outline: none; background: #fff; }
@@ -22,8 +28,6 @@
   .top-bar { display: flex; justify-content: space-between; padding: 12px 16px 0 16px; }
   #logout { background:white; color:#e65100; border:1px solid #e65100; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
   #logout:hover { background: #fff3e0; }
-  #changeRole { background:white; color:#555; border:1px solid #ddd; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
-  #changeRole:hover { background: #f1f3f5; }
 
   .shopName { text-align:center; font-size:22px; font-weight:bold; padding:15px 10px 5px 10px; color:#222; }
   
@@ -60,7 +64,6 @@
   .prod { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
   .prod h3 { margin:0 0 6px 0; font-size: 18px; color: #222; }
   .prod .price { color:#e65100; font-weight:bold; font-size: 16px; margin-bottom: 6px; }
-  .prod style-type { color: #666; font-size: 14px; }
   
   .btn { padding:10px 16px; border:none; border-radius:8px; color:white; font-size:14px; font-weight: bold; margin-top:10px; margin-left:8px; cursor: pointer; transition: opacity 0.2s; }
   .btn:hover { opacity: 0.9; }
@@ -71,7 +74,12 @@
 </style>
 </head>
 <body>
-<header>🍽️ واجهة المطعم</header>
+
+<div class="global-top-bar">
+  <button id="changeRoleGlobal">🔄 تغيير الدور</button>
+</div>
+
+<header><span>🍽️ واجهة المطعم</span></header>
 
 <div id="loginBox">
   <h2>تسجيل دخول المطعم</h2>
@@ -84,7 +92,6 @@
 <div id="app">
   <div class="top-bar">
     <button id="logout">خروج</button>
-    <button id="changeRole">تغيير الدور</button>
   </div>
   <div class="shopName" id="shopName"></div>
   <div id="subBar"></div>
@@ -258,11 +265,16 @@ function renderProducts(shop) {
   content.innerHTML = html;
 }
 
+function handleRoleChange() {
+  localStorage.removeItem('sb_role');
+  location.href = 'index.html?choose=1';
+}
+
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
   if (t.id === 'logout') { signOut(auth); return; }
-  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
+  if (t.id === 'changeRoleGlobal') { handleRoleChange(); return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); editId = null; render(); return; }
 
   if (t.classList.contains('act') && !t.disabled) {
