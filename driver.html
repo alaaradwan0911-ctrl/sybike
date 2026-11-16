@@ -8,33 +8,49 @@
 <link rel="icon" href="favicon.png">
 <meta name="theme-color" content="#1565c0">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
-  header { background:#1565c0; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
-  #loginBox { padding:20px; }
-  #loginBox h2 { text-align:center; color:#1565c0; }
-  #loginBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
-  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#1565c0; color:white; font-size:17px; font-weight:bold; }
-  #loginErr { color:#c62828; text-align:center; margin-top:10px; }
-  #app { display:none; }
-  .topBtns { display:flex; gap:8px; margin:10px 12px 0 12px; }
-  .topBtns button { background:white; color:#1565c0; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; }
-  .who { text-align:center; font-size:20px; font-weight:bold; color:#1565c0; padding:12px; }
-  .sub { margin:0 12px 8px 12px; padding:12px; border-radius:10px; text-align:center; font-weight:bold; }
-  .sub.ok { background:#c8e6c9; color:#2e7d32; }
-  .sub.bad { background:#ffcdd2; color:#c62828; }
-  .stats { display:flex; gap:10px; padding:0 12px 12px 12px; }
-  .stat { flex:1; background:white; border-radius:12px; padding:12px; text-align:center; }
-  .stat b { display:block; font-size:20px; color:#1565c0; margin-top:4px; }
-  .order { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
-  .order h3 { margin:0 0 8px 0; }
-  .line { padding:4px 0; color:#444; }
-  .status { display:inline-block; padding:4px 12px; border-radius:20px; font-size:14px; margin-bottom:8px; }
-  .ready { background:#bbdefb; color:#1565c0; }
-  .onway { background:#fff9c4; color:#f57f17; }
-  .order button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#1565c0; }
-  .order button.done { background:#2e7d32; }
-  .order button:disabled { background:#bbb; }
-  .empty { text-align:center; color:#888; padding:30px; }
+  body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
+  header { background:linear-gradient(135deg, #1565c0, #1976d2); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  
+  #loginBox { max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  #loginBox h2 { text-align:center; color:#1565c0; margin-top:0; margin-bottom: 20px; font-size: 20px; }
+  #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
+  #loginBox input:focus { border-color: #1565c0; outline: none; background: #fff; }
+  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#1565c0; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(21,101,192,0.3); transition: background 0.2s; }
+  #loginBox button:active { background: #0d47a1; }
+  #loginErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
+  
+  #app { display:none; max-width: 600px; margin: 0 auto; }
+  
+  .topBtns { display:flex; justify-content: space-between; padding: 12px 16px 0 16px; }
+  #logout { background:white; color:#1565c0; border:1px solid #1565c0; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
+  #logout:hover { background: #e3f2fd; }
+  #changeRole { background:white; color:#555; border:1px solid #ddd; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
+  #changeRole:hover { background: #f1f3f5; }
+
+  .who { text-align:center; font-size:22px; font-weight:bold; color:#222; padding:15px 10px 5px 10px; }
+  
+  .sub { margin:10px 16px; padding:14px; border-radius:12px; text-align:center; font-weight:bold; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+  .sub.ok { background:#e8f5e9; color:#2e7d32; border: 1px solid #c8e6c9; }
+  .sub.bad { background:#ffebee; color:#c62828; border: 1px solid #ffcdd2; }
+  
+  .stats { display:flex; gap:12px; padding:4px 16px 12px 16px; }
+  .stat { flex:1; background:white; border-radius:14px; padding:16px; text-align:center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); font-size: 14px; color: #666; }
+  .stat b { display:block; font-size:20px; color:#1565c0; margin-top:6px; }
+  
+  .order { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
+  .order h3 { margin:0 0 10px 0; font-size: 18px; color: #222; }
+  .line { padding:6px 0; color:#444; font-size: 15px; border-bottom: 1px dashed #f0f0f0; }
+  .line:last-of-type { border-bottom: none; }
+  
+  .status { display:inline-block; padding:5px 14px; border-radius:20px; font-size:13px; font-weight: bold; margin-bottom:10px; }
+  .ready { background:#e3f2fd; color:#1565c0; }
+  .onway { background:#fffde7; color:#f57f17; }
+  
+  .order button { width:100%; padding:14px; margin-top:14px; border:none; border-radius:10px; font-size:16px; font-weight:bold; color:white; background:#1565c0; cursor: pointer; box-shadow: 0 4px 10px rgba(21,101,192,0.2); transition: background 0.2s; }
+  .order button.done { background:#2e7d32; box-shadow: 0 4px 10px rgba(46,125,50,0.2); }
+  .order button:disabled { background:#e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; }
+  
+  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 </style>
 </head>
 <body>
@@ -172,57 +188,4 @@ function render() {
   document.getElementById('count').textContent = mineDone.length;
   document.getElementById('earn').textContent = fmt(mineDone.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
 
-  const list = allOrders.filter(function(o) {
-    if (o.state === 'ready') return true;
-    if (o.state === 'onway' && isMine(o)) return true;
-    return false;
-  });
-
-  if (list.length === 0) {
-    ordersBox.innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>';
-    return;
-  }
-
-  ordersBox.innerHTML = list.map(function(o) {
-    const shops = Array.from(new Set(o.items.map(function(i) { return i.shop; }))).map(esc).join('، ');
-    let btn;
-    if (o.state === 'ready') {
-      btn = '<button class="act" ' + (ok ? '' : 'disabled') + ' data-id="' + o.id + '" data-s="onway">' +
-        (ok ? 'استلمت الطلب' : 'الاشتراك غير مفعّل') + '</button>';
-    } else {
-      btn = '<button class="act done" data-id="' + o.id + '" data-s="delivered">تم التوصيل</button>';
-    }
-    return '<div class="order"><span class="status ' + o.state + '">' + labels[o.state] + '</span>' +
-      '<h3>طلب رقم ' + o.id.slice(0, 6) + '</h3>' +
-      '<div class="line">🍽️ من: ' + shops + '</div>' +
-      '<div class="line">👤 الزبون: ' + esc(o.customer) + '</div>' +
-      '<div class="line">📍 إلى: ' + esc(o.address) + '</div>' +
-      '<div class="line">💵 المبلغ المطلوب من الزبون: ' + fmt(o.total) + '</div>' +
-      '<div class="line">🚲 أجرتك من هذا الطلب: ' + fmt(o.deliveryFee || 0) + '</div>' + btn + '</div>';
-  }).join('');
-}
-
-document.addEventListener('click', async function(e) {
-  const t = e.target;
-  if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { signOut(auth); return; }
-  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
-  if (!t.classList.contains('act') || t.disabled) return;
-  const drv = myDriver();
-  if (!drv) { alert('هذا الإيميل غير مربوط بسائق'); return; }
-  const data = { state: t.dataset.s };
-  if (t.dataset.s === 'onway') { data.driver = drv.name; data.driverEmail = myEmail; }
-  try {
-    await updateDoc(doc(db, 'orders', t.dataset.id), data);
-  } catch (err) {
-    alert('صار خطأ، جرب مرة ثانية');
-    console.error(err);
-  }
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.getElementById('loginBox').style.display !== 'none') { doLogin(); }
-});
-</script>
-</body>
-</html>
+  const list =
