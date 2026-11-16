@@ -29,7 +29,6 @@
   .r-driver { background:linear-gradient(135deg, #1565c0, #1976d2); }
   .r-admin { background:linear-gradient(135deg, #4a148c, #6a1b9a); }
 
-  /* صندوق تسجيل الدخول للزبون */
   #authBox { display:none; max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
   #authBox h2 { text-align:center; color:#2e7d32; margin-top:0; margin-bottom: 20px; font-size: 22px; }
   #authBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
@@ -88,6 +87,12 @@
   .map-btn { display: inline-block; width: 100%; padding: 14px; background: #1565c0; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 10px rgba(21,101,192,0.3); }
 
   .logout-user { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; float: left; }
+
+  /* تصميم التنبيهات العائمة (Toast Notifications) الاحترافية */
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  #toast.success { background: #2e7d32; }
+  #toast.error { background: #c62828; }
 </style>
 </head>
 <body>
@@ -100,6 +105,8 @@
   if (!forceChoose && role && pages[role]) { location.replace(pages[role]); }
 })();
 </script>
+
+<div id="toast"></div>
 
 <header id="topHeader" style="display:none">
   🚲 سيريا بايك 
@@ -117,7 +124,6 @@
   <button class="role r-admin" data-role="admin">⚙️ أنا المدير<small>لوحة التحكم</small></button>
 </div>
 
-<!-- صندوق تسجيل الدخول / إنشاء حساب للزبون -->
 <div id="authBox">
   <h2 id="authTitle">تسجيل دخول الزبون</h2>
   <input id="authName" class="field" type="text" placeholder="اسمك الكامل" style="display:none;">
@@ -186,7 +192,7 @@ const db = getFirestore(app);
 const pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
 const stateLabels = {
   'new': '⏳ بانتظار موافقة المطعم',
-  'ready': '🍳 الطلب قيد التحضير / جاهز للاستلام',
+  'ready': '🍳 الطلب قيد التحضير / جاهز للاستلاستلام',
   'onway': '🚴 السائق في الطريق إليك!',
   'delivered': '✅ تم توصيل الطلب بنجاح'
 };
@@ -203,6 +209,16 @@ let currentUserName = '';
 const DELIVERY_FEE = 20000;
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
+
+// دالة التنبيهات العائمة (Toast) الاحترافية بدلاً من الـ alert
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'show ' + type;
+  setTimeout(function() {
+    toast.className = '';
+  }, 3000);
+}
 
 function showChooser() {
   document.getElementById('chooser').style.display = 'flex';
@@ -229,7 +245,6 @@ function showCustomer() {
   show(currentType);
 }
 
-// مراقبة حالة تسجيل دخول الزبون
 onAuthStateChanged(auth, function(user) {
   const savedRole = localStorage.getItem('sb_role');
   if (savedRole === 'customer') {
@@ -277,7 +292,11 @@ function show(type) {
   }).join('');
 }
 
-function add(id) { cart[id] = (cart[id] || 0) + 1; updateBar(); }
+function add(id) { 
+  cart[id] = (cart[id] || 0) + 1; 
+  updateBar();
+  showToast('تمت إضافة المنتج للسلة');
+}
 
 function change(id, d) {
   cart[id] = (cart[id] || 0) + d;
@@ -331,7 +350,7 @@ function closeCart() {
 
 function getMyLocation() {
   if (!navigator.geolocation) {
-    alert('متصفحك لا يدعم تحديد الموقع الجغرافي');
+    showToast('متصفحك لا يدعم تحديد الموقع', 'error');
     return;
   }
   const btn = document.getElementById('getLocBtn');
@@ -344,10 +363,11 @@ function getMyLocation() {
       };
       document.getElementById('custAddr').value = 'الموقع الحالي (تم التقاط الإحداثيات)';
       btn.textContent = '📍 تم التحديد';
+      showToast('تم تحديد موقعك بنجاح');
       setTimeout(function() { btn.textContent = '📍 حدد موقعي'; }, 3000);
     },
     function(error) {
-      alert('تعذر تحديد الموقع، تأكد من السماح بالوصول للموقع من إعدادات المتصفح.');
+      showToast('تعذر تحديد الموقع، تحقق من الصلاحيات', 'error');
       btn.textContent = '📍 حدد موقعي';
     },
     { enableHighAccuracy: true }
@@ -400,10 +420,12 @@ async function handleAuth() {
 
   try {
     if (isRegisterMode) {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await createUserWithEmailAndPassword(auth, email, pass);
       currentUserName = name;
+      showToast('تم إنشاء الحساب وتسجيل الدخول بنجاح');
     } else {
       await signInWithEmailAndPassword(auth, email, pass);
+      showToast('مرحباً بك مجدداً');
     }
   } catch (e) {
     errDiv.textContent = 'خطأ في البيانات المدخلة، تأكد من صحة الإيميل أو كلمة السر';
@@ -413,8 +435,8 @@ async function handleAuth() {
 
 async function confirmOrder() {
   const addr = document.getElementById('custAddr').value.trim();
-  if (totals().count === 0) { alert('السلة فارغة'); return; }
-  if (!addr) { alert('اكتب عنوانك أو حدد موقعك'); return; }
+  if (totals().count === 0) { showToast('السلة فارغة', 'error'); return; }
+  if (!addr) { showToast('الرجاء كتابة أو تحديد عنوانك', 'error'); return; }
 
   const items = cartItems().map(function(i) {
     return {n: i.n, shop: i.shop, q: cart[i.id], p: i.p};
@@ -437,9 +459,10 @@ async function confirmOrder() {
     customerCoords = null;
     document.getElementById('custAddr').value = '';
     updateBar();
+    showToast('تم إرسال طلبك بنجاح!');
     startTrackingOrder(ref.id);
   } catch (e) {
-    alert('صار خطأ، جرب مرة ثانية');
+    showToast('حدث خطأ، حاول مرة أخرى', 'error');
     console.error(e);
   }
 }
@@ -465,6 +488,7 @@ document.addEventListener('click', function(e) {
   if (t.id === 'logoutUserBtn') {
     signOut(auth);
     showAuth();
+    showToast('تم تسجيل الخروج');
     return;
   }
   if (t.id === 'authToggleBtn') {
@@ -497,7 +521,6 @@ if ('serviceWorker' in navigator) {
 
 const saved = localStorage.getItem('sb_role');
 if (saved === 'customer') {
-  // شيك إذا كان مسجل دخول مسبقاً
   onAuthStateChanged(auth, function(user) {
     if (!user) showAuth();
   });
