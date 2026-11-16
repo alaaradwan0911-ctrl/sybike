@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>سيريا بايك</title>
+<title>سيريا بايك - الزبون</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -28,6 +28,17 @@
   .r-restaurant { background:linear-gradient(135deg, #e65100, #f57c00); }
   .r-driver { background:linear-gradient(135deg, #1565c0, #1976d2); }
   .r-admin { background:linear-gradient(135deg, #4a148c, #6a1b9a); }
+
+  /* صندوق تسجيل الدخول للزبون */
+  #authBox { display:none; max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  #authBox h2 { text-align:center; color:#2e7d32; margin-top:0; margin-bottom: 20px; font-size: 22px; }
+  #authBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
+  #authBox input:focus { border-color: #2e7d32; outline: none; background: #fff; }
+  #authBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(46,125,50,0.3); transition: background 0.2s; margin-top: 5px; }
+  #authBox button:active { background: #1b5e20; }
+  .auth-switch { text-align: center; margin-top: 15px; font-size: 14px; color: #666; cursor: pointer; }
+  .auth-switch span { color: #2e7d32; font-weight: bold; }
+  #authErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
 
   #customerApp { display:none; padding-bottom:90px; max-width: 600px; margin: 0 auto; }
   
@@ -54,7 +65,7 @@
   
   .row { background:white; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
   .row .qty { display: flex; align-items: center; }
-  .row .qty button { width:34px; height:34px; border:none; border-radius:50%; background:#e8f5e9; color: #2e7d32; font-size:18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content me; justify-content: center; }
+  .row .qty button { width:34px; height:34px; border:none; border-radius:50%; background:#e8f5e9; color: #2e7d32; font-size:18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .row .qty span { margin:0 12px; font-weight:bold; font-size: 16px; }
 
   #total { background:white; border-radius:12px; padding:16px; font-size:16px; font-weight:bold; margin:16px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); line-height: 1.8; color: #444; }
@@ -75,6 +86,8 @@
   .track-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; }
   .track-status { font-size: 20px; font-weight: bold; color: #1565c0; margin: 15px 0; }
   .map-btn { display: inline-block; width: 100%; padding: 14px; background: #1565c0; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 10px rgba(21,101,192,0.3); }
+
+  .logout-user { background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; float: left; }
 </style>
 </head>
 <body>
@@ -88,7 +101,11 @@
 })();
 </script>
 
-<header id="topHeader" style="display:none">🚲 سيريا بايك<button id="roleBtn">تغيير الدور</button></header>
+<header id="topHeader" style="display:none">
+  🚲 سيريا بايك 
+  <button id="roleBtn">تغيير الدور</button>
+  <button id="logoutUserBtn" class="logout-user" style="display:none;">خروج</button>
+</header>
 
 <div id="chooser">
   <div class="logo"><img src="logo.png" alt="Sybike" onerror="this.style.display='none'"></div>
@@ -98,6 +115,17 @@
   <button class="role r-restaurant" data-role="restaurant">🍽️ أنا مطعم أو متجر<small>استقبل الطلبات وأدر منتجاتك</small></button>
   <button class="role r-driver" data-role="driver">🚲 أنا سائق<small>استلم الطلبات وأوصلها</small></button>
   <button class="role r-admin" data-role="admin">⚙️ أنا المدير<small>لوحة التحكم</small></button>
+</div>
+
+<!-- صندوق تسجيل الدخول / إنشاء حساب للزبون -->
+<div id="authBox">
+  <h2 id="authTitle">تسجيل دخول الزبون</h2>
+  <input id="authName" class="field" type="text" placeholder="اسمك الكامل" style="display:none;">
+  <input id="authEmail" class="field" type="email" placeholder="الإيميل">
+  <input id="authPass" class="field" type="password" placeholder="كلمة السر">
+  <button id="authSubmitBtn">دخول</button>
+  <div id="authErr"></div>
+  <div class="auth-switch" id="authSwitchText">ليس لديك حساب؟ <span id="authToggleBtn">سجل الآن</span></div>
 </div>
 
 <div id="customerApp">
@@ -118,7 +146,6 @@
     <h2>سلة الطلب</h2>
     <div id="cartItems"></div>
     <div id="total"></div>
-    <input class="field" id="custName" placeholder="اسمك">
     <div class="loc-box">
       <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
       <button id="getLocBtn" type="button">📍 حدد موقعي</button>
@@ -140,6 +167,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, addDoc, onSnapshot, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -152,6 +180,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
 
 const pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
@@ -169,6 +198,8 @@ let currentType = 'مطعم';
 let listening = false;
 let customerCoords = null;
 let activeOrderUnsub = null;
+let isRegisterMode = false;
+let currentUserName = '';
 const DELIVERY_FEE = 20000;
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
@@ -176,16 +207,40 @@ function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
 function showChooser() {
   document.getElementById('chooser').style.display = 'flex';
   document.getElementById('topHeader').style.display = 'none';
+  document.getElementById('authBox').style.display = 'none';
   document.getElementById('customerApp').style.display = 'none';
+}
+
+function showAuth() {
+  document.getElementById('chooser').style.display = 'none';
+  document.getElementById('topHeader').style.display = 'block';
+  document.getElementById('authBox').style.display = 'block';
+  document.getElementById('customerApp').style.display = 'none';
+  document.getElementById('logoutUserBtn').style.display = 'none';
 }
 
 function showCustomer() {
   document.getElementById('chooser').style.display = 'none';
+  document.getElementById('authBox').style.display = 'none';
   document.getElementById('topHeader').style.display = 'block';
   document.getElementById('customerApp').style.display = 'block';
+  document.getElementById('logoutUserBtn').style.display = 'inline-block';
   startProducts();
   show(currentType);
 }
+
+// مراقبة حالة تسجيل دخول الزبون
+onAuthStateChanged(auth, function(user) {
+  const savedRole = localStorage.getItem('sb_role');
+  if (savedRole === 'customer') {
+    if (user) {
+      currentUserName = user.displayName || user.email.split('@')[0];
+      showCustomer();
+    } else {
+      showAuth();
+    }
+  }
+});
 
 function startProducts() {
   if (listening) return;
@@ -331,11 +386,35 @@ function startTrackingOrder(orderId) {
   });
 }
 
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value;
+  const name = document.getElementById('authName').value.trim();
+  const errDiv = document.getElementById('authErr');
+  errDiv.textContent = '';
+
+  if (!email || !pass || (isRegisterMode && !name)) {
+    errDiv.textContent = 'الرجاء تعبئة كافة الحقول المطلوبة';
+    return;
+  }
+
+  try {
+    if (isRegisterMode) {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      currentUserName = name;
+    } else {
+      await signInWithEmailAndPassword(auth, email, pass);
+    }
+  } catch (e) {
+    errDiv.textContent = 'خطأ في البيانات المدخلة، تأكد من صحة الإيميل أو كلمة السر';
+    console.error(e);
+  }
+}
+
 async function confirmOrder() {
-  const name = document.getElementById('custName').value.trim();
   const addr = document.getElementById('custAddr').value.trim();
   if (totals().count === 0) { alert('السلة فارغة'); return; }
-  if (!name || !addr) { alert('اكتب اسمك وعنوانك أو حدد موقعك'); return; }
+  if (!addr) { alert('اكتب عنوانك أو حدد موقعك'); return; }
 
   const items = cartItems().map(function(i) {
     return {n: i.n, shop: i.shop, q: cart[i.id], p: i.p};
@@ -343,7 +422,8 @@ async function confirmOrder() {
 
   try {
     const ref = await addDoc(collection(db, 'orders'), {
-      customer: name,
+      customer: currentUserName || auth.currentUser.email,
+      customerEmail: auth.currentUser.email,
       address: addr,
       location: customerCoords || null,
       items: items,
@@ -355,7 +435,6 @@ async function confirmOrder() {
     });
     cart = {};
     customerCoords = null;
-    document.getElementById('custName').value = '';
     document.getElementById('custAddr').value = '';
     updateBar();
     startTrackingOrder(ref.id);
@@ -371,10 +450,34 @@ document.addEventListener('click', function(e) {
   if (rb) {
     const r = rb.dataset.role;
     localStorage.setItem('sb_role', r);
-    if (pages[r]) { location.href = pages[r]; } else { showCustomer(); }
+    if (pages[r]) { 
+      location.href = pages[r]; 
+    } else { 
+      showAuth(); 
+    }
     return;
   }
-  if (t.id === 'roleBtn') { localStorage.removeItem('sb_role'); showChooser(); return; }
+  if (t.id === 'roleBtn') { 
+    localStorage.removeItem('sb_role'); 
+    showChooser(); 
+    return; 
+  }
+  if (t.id === 'logoutUserBtn') {
+    signOut(auth);
+    showAuth();
+    return;
+  }
+  if (t.id === 'authToggleBtn') {
+    isRegisterMode = !isRegisterMode;
+    document.getElementById('authTitle').textContent = isRegisterMode ? 'إنشاء حساب جديد' : 'تسجيل دخول الزبون';
+    document.getElementById('authName').style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('authSubmitBtn').textContent = isRegisterMode ? 'تسجيل حساب' : 'دخول';
+    document.getElementById('authSwitchText').innerHTML = isRegisterMode ? 
+      'لديك حساب بالفعل؟ <span id="authToggleBtn">سجل دخولك</span>' : 
+      'ليس لديك حساب؟ <span id="authToggleBtn">سجل الآن</span>';
+    return;
+  }
+  if (t.id === 'authSubmitBtn') { handleAuth(); return; }
   if (t.dataset.type) { show(t.dataset.type); return; }
   if (t.classList.contains('addBtn')) { add(t.dataset.id); return; }
   if (t.classList.contains('chgBtn')) { change(t.dataset.id, Number(t.dataset.d)); return; }
@@ -384,12 +487,23 @@ document.addEventListener('click', function(e) {
   if (t.id === 'confirm') { confirmOrder(); return; }
 });
 
+document.getElementById('authPass').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') handleAuth();
+});
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
 
 const saved = localStorage.getItem('sb_role');
-if (saved === 'customer') { showCustomer(); } else { showChooser(); }
+if (saved === 'customer') {
+  // شيك إذا كان مسجل دخول مسبقاً
+  onAuthStateChanged(auth, function(user) {
+    if (!user) showAuth();
+  });
+} else {
+  showChooser();
+}
 </script>
 </body>
 </html>
