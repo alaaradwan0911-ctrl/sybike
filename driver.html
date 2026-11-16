@@ -101,7 +101,7 @@ let allOrders = [];
 let members = [];
 let myEmail = '';
 let started = false;
-let watchId = null; // لمتابعة إحداثيات GPS للسائق
+let watchId = null;
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
 function esc(s) {
@@ -155,68 +155,4 @@ async function doLogin() {
   }
 }
 
-// تتبع موقع السائق وإرساله لفايربيس باستمرار عند وجود طلب في الطريق
-function startTracking(orderId) {
-  if (watchId !== null) return;
-  if (!navigator.geolocation) return;
-
-  watchId = navigator.geolocation.watchPosition(
-    async function(pos) {
-      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      try {
-        await updateDoc(doc(db, 'orders', orderId), { driverLocation: coords });
-      } catch (err) {
-        console.error("خطأ في تحديث موقع السائق:", err);
-      }
-    },
-    function(err) {
-      console.error("خطأ في تحديد موقع GPS:", err);
-    },
-    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
-  );
-}
-
-function stopTracking() {
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-}
-
-async function updateState(id, newState, currentDriverName) {
-  try {
-    const updateData = { state: newState };
-    if (newState === 'onway') {
-      updateData.driver = currentDriverName;
-      updateData.driverEmail = myEmail;
-      startTracking(id); // بدء بث موقع السائق الحي
-    } else if (newState === 'delivered') {
-      stopTracking(); // إيقاف البث عند تسليم الطلب
-    }
-    await updateDoc(doc(db, 'orders', id), updateData);
-  } catch (e) {
-    alert('حدث خطأ أثناء تحديث حالة الطلب');
-    console.error(e);
-  }
-}
-
-function render() {
-  const drv = myDriver();
-  const ordersBox = document.getElementById('orders');
-
-  if (!drv) {
-    document.getElementById('who').textContent = '';
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي سائق. تواصل مع الإدارة.</div>';
-    document.getElementById('count').textContent = '0';
-    document.getElementById('earn').textContent = fmt(0);
-    ordersBox.innerHTML = '';
-    return;
-  }
-
-  const me = drv.name;
-  const ok = !!(drv.paidUntil && drv.paidUntil > Date.now());
-  document.getElementById('who').textContent = '🚲 ' + me;
-
-  if (ok) {
-    document.getElementById('
+function startTracking
