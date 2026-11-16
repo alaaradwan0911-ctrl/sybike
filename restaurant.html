@@ -5,88 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>سيريا بايك - المطعم</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.png">
 <meta name="theme-color" content="#e65100">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
-  header { background:linear-gradient(135deg, #e65100, #f57c00); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
-  header span { flex: 1; text-align: center; }
-
-  .global-top-bar { padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
-  #changeRoleGlobal { background: white; color: #555; border: 1px solid #ddd; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
-  #changeRoleGlobal:hover { background: #f1f3f5; }
-  
-  #loginBox { max-width: 400px; margin: 30px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-  #loginBox h2 { text-align:center; color:#e65100; margin-top:0; margin-bottom: 20px; font-size: 20px; }
-  #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
-  #loginBox input:focus { border-color: #e65100; outline: none; background: #fff; }
-  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#e65100; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(230,81,0,0.3); transition: background 0.2s; }
-  #loginBox button:active { background: #d84315; }
-  #loginErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
-  
-  #app { display:none; max-width: 600px; margin: 0 auto; }
-  .top-bar { display: flex; justify-content: space-between; padding: 12px 16px 0 16px; }
-  #logout { background:white; color:#e65100; border:1px solid #e65100; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
-  #logout:hover { background: #fff3e0; }
-
-  .shopName { text-align:center; font-size:22px; font-weight:bold; padding:15px 10px 5px 10px; color:#222; }
-  
-  .sub { margin:10px 16px; padding:14px; border-radius:12px; text-align:center; font-weight:bold; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-  .sub.ok { background:#e8f5e9; color:#2e7d32; border: 1px solid #c8e6c9; }
-  .sub.bad { background:#ffebee; color:#c62828; border: 1px solid #ffcdd2; }
-  
-  .tabs { display:flex; gap:10px; padding:12px 16px; }
-  .tabs button { flex:1; padding:14px; border:none; border-radius:12px; background:white; font-size:16px; font-weight:bold; color: #666; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s; }
-  .tabs button.active { background:#e65100; color:white; box-shadow: 0 4px 12px rgba(230,81,0,0.3); }
-  
-  .info { padding:4px 16px; color:#666; font-size: 14px; font-weight: 500; }
-  
-  .order { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
-  .order h3 { margin:0 0 10px 0; font-size: 18px; color: #222; }
-  .item { padding:6px 0; font-size:16px; color: #444; border-bottom: 1px dashed #f0f0f0; }
-  .item:last-child { border-bottom: none; }
-  .addr { color:#555; margin:12px 0; padding-top:10px; border-top:1px solid #eee; font-size: 15px; }
-  
-  .status { display:inline-block; padding:5px 14px; border-radius:20px; font-size:13px; font-weight: bold; margin-bottom:10px; }
-  .new { background:#fff3e0; color:#e65100; }
-  .cooking { background:#fffde7; color:#f57f17; }
-  
-  .order button { width:100%; padding:14px; border:none; border-radius:10px; font-size:16px; font-weight:bold; color:white; background:#e65100; cursor: pointer; box-shadow: 0 4px 10px rgba(230,81,0,0.2); transition: background 0.2s; margin-top: 5px; }
-  .order button.done { background:#2e7d32; box-shadow: 0 4px 10px rgba(46,125,50,0.2); }
-  .order button:disabled { background:#e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; }
-  
-  .add { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-  .add b { font-size: 17px; color: #333; }
-  .add input { width:100%; box-sizing:border-box; padding:12px; margin-top: 10px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; font-size:15px; background: #fafafa; }
-  .add input:focus { border-color: #e65100; outline: none; background: #fff; }
-  .add button { width:100%; padding:12px; border:none; border-radius:10px; background:#e65100; color:white; font-size:16px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(230,81,0,0.2); }
-  
-  .prod { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
-  .prod h3 { margin:0 0 6px 0; font-size: 18px; color: #222; }
-  .prod .price { color:#e65100; font-weight:bold; font-size: 16px; margin-bottom: 6px; }
-  
-  .btn { padding:10px 16px; border:none; border-radius:8px; color:white; font-size:14px; font-weight: bold; margin-top:10px; margin-left:8px; cursor: pointer; transition: opacity 0.2s; }
-  .btn:hover { opacity: 0.9; }
+  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
+  header { background:#e65100; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
+  #loginBox { padding:20px; }
+  #loginBox h2 { text-align:center; color:#e65100; }
+  #loginBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#e65100; color:white; font-size:17px; font-weight:bold; }
+  #loginErr { color:#c62828; text-align:center; margin-top:10px; }
+  #app { display:none; }
+  .topBtns { display:flex; gap:8px; margin:10px 12px 0 12px; }
+  .topBtns button { background:white; color:#e65100; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; }
+  .shopName { text-align:center; font-size:20px; font-weight:bold; padding:10px; color:#e65100; }
+  .sub { margin:0 12px 8px 12px; padding:12px; border-radius:10px; text-align:center; font-weight:bold; }
+  .sub.ok { background:#c8e6c9; color:#2e7d32; }
+  .sub.bad { background:#ffcdd2; color:#c62828; }
+  .tabs { display:flex; gap:8px; padding:0 12px 8px 12px; }
+  .tabs button { flex:1; padding:12px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
+  .tabs button.active { background:#e65100; color:white; }
+  .info { padding:0 12px 6px 12px; color:#555; text-align:center; }
+  .order { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .order h3 { margin:0 0 8px 0; }
+  .item { padding:4px 0; font-size:17px; }
+  .addr { color:#666; margin:10px 0; padding-top:8px; border-top:1px solid #eee; }
+  .status { display:inline-block; padding:4px 12px; border-radius:20px; font-size:14px; margin-bottom:8px; }
+  .new { background:#ffe0b2; color:#e65100; }
+  .cooking { background:#fff9c4; color:#f57f17; }
+  .order button { width:100%; padding:12px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#e65100; }
+  .order button.done { background:#2e7d32; }
+  .order button:disabled { background:#bbb; }
+  .add { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .add input, .add select { width:100%; box-sizing:border-box; padding:12px; margin-bottom:8px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  .add button { width:100%; padding:12px; border:none; border-radius:8px; background:#e65100; color:white; font-size:16px; font-weight:bold; }
+  .prod { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .prod h3 { margin:0 0 4px 0; }
+  .prod .price { color:#e65100; font-weight:bold; }
+  .btn { padding:10px 14px; border:none; border-radius:8px; color:white; font-size:15px; margin-top:8px; margin-left:6px; }
   .edit { background:#1565c0; }
   .del { background:#c62828; }
-  
-  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-
-  /* تصميم التنبيهات العائمة (Toast) */
-  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
-  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-  #toast.success { background: #2e7d32; }
-  #toast.error { background: #c62828; }
+  .empty { text-align:center; color:#888; padding:30px; }
 </style>
 </head>
 <body>
-
-<div id="toast"></div>
-
-<div class="global-top-bar">
-  <button id="changeRoleGlobal">🔄 تغيير الدور</button>
-</div>
-
-<header><span>🍽️ واجهة المطعم</span></header>
+<header>🍽️ واجهة المطعم</header>
 
 <div id="loginBox">
   <h2>تسجيل دخول المطعم</h2>
@@ -97,8 +60,9 @@
 </div>
 
 <div id="app">
-  <div class="top-bar">
+  <div class="topBtns">
     <button id="logout">خروج</button>
+    <button id="changeRole">تغيير الدور</button>
   </div>
   <div class="shopName" id="shopName"></div>
   <div id="subBar"></div>
@@ -106,13 +70,29 @@
     <button id="t1" class="active" data-tab="1">الطلبات</button>
     <button id="t2" data-tab="2">المنتجات</button>
   </div>
-  <div id="content"></div>
+
+  <div id="ordersView">
+    <div class="info" id="info"></div>
+    <div id="ordersList"></div>
+  </div>
+
+  <div id="productsView" style="display:none">
+    <div class="add">
+      <b id="formTitle">إضافة منتج جديد</b><br><br>
+      <input id="pName" placeholder="اسم المنتج">
+      <input id="pPrice" type="number" inputmode="numeric" placeholder="السعر بالليرة">
+      <select id="pType"><option value="مطعم">مطعم</option><option value="سوبر ماركت">سوبر ماركت</option></select>
+      <button id="saveProd">إضافة</button>
+      <button id="cancelProd" style="display:none;background:#888;margin-top:8px">إلغاء التعديل</button>
+    </div>
+    <div id="prodList"></div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -128,222 +108,231 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const labels = {new:'طلب جديد', cooking:'قيد التحضير'};
-let allOrders = [];
-let members = [];
-let products = [];
 let myEmail = '';
+let member = null;
+let shopOrders = [];
+let myProducts = [];
+let unsubs = [];
+let shopUnsubs = [];
 let current = 1;
 let editId = null;
-let started = false;
 
+function $(id) { return document.getElementById(id); }
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
-
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = 'show ' + type;
-  setTimeout(function() {
-    toast.className = '';
-  }, 3000);
-}
-
-function myShop() {
-  return members.find(function(m) {
-    return m.type === 'shop' && m.email && m.email.toLowerCase() === myEmail;
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
+function validShop() { return member && member.type === 'shop'; }
+function subOk() { return !!(member && member.paidUntil && member.paidUntil > Date.now()); }
 
-function startListening() {
-  if (started) return;
-  started = true;
-  onSnapshot(collection(db, 'orders'), function(snap) {
-    allOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+function stopShop() {
+  shopUnsubs.forEach(function(f) { f(); });
+  shopUnsubs = [];
+  shopOrders = [];
+  myProducts = [];
+}
+
+function stopAll() {
+  unsubs.forEach(function(f) { f(); });
+  unsubs = [];
+  stopShop();
+  member = null;
+}
+
+function startShop(name) {
+  stopShop();
+  shopUnsubs.push(onSnapshot(query(collection(db, 'orders'), where('shops', 'array-contains', name)), function(snap) {
+    shopOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+    renderOrders();
+  }, function(err) { console.error(err); }));
+  shopUnsubs.push(onSnapshot(query(collection(db, 'products'), where('ownerEmail', '==', myEmail)), function(snap) {
+    myProducts = snap.docs.map(function(d) { const p = d.data(); p.id = d.id; return p; });
+    renderProducts();
+  }, function(err) { console.error(err); }));
+}
+
+function listenMember() {
+  unsubs.push(onSnapshot(doc(db, 'members', myEmail), function(snap) {
+    const oldName = validShop() ? member.name : null;
+    member = snap.exists() ? snap.data() : null;
+    if (validShop()) {
+      if (member.name !== oldName) startShop(member.name);
+    } else {
+      stopShop();
+    }
     render();
-  });
-  onSnapshot(collection(db, 'members'), function(snap) {
-    members = snap.docs.map(function(d) { const m = d.data(); m.id = d.id; return m; });
-    render();
-  });
-  onSnapshot(collection(db, 'products'), function(snap) {
-    products = snap.docs.map(function(d) { const p = d.data(); p.id = d.id; return p; });
-    render();
-  });
+  }, function(err) { console.error(err); member = null; render(); }));
 }
 
 onAuthStateChanged(auth, function(user) {
+  stopAll();
   if (user) {
     myEmail = (user.email || '').toLowerCase();
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    startListening();
+    $('loginBox').style.display = 'none';
+    $('app').style.display = 'block';
+    listenMember();
     render();
   } else {
     myEmail = '';
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
+    $('loginBox').style.display = 'block';
+    $('app').style.display = 'none';
   }
 });
 
 async function doLogin() {
-  const email = document.getElementById('email').value.trim();
-  const pass = document.getElementById('pass').value;
-  document.getElementById('loginErr').textContent = '';
+  const email = $('email').value.trim();
+  const pass = $('pass').value;
+  $('loginErr').textContent = '';
   try {
     await signInWithEmailAndPassword(auth, email, pass);
-    showToast('مرحباً بك في لوحة المطعم');
   } catch (e) {
-    document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
+    $('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
   }
 }
 
 function render() {
-  document.getElementById('t1').className = current === 1 ? 'active' : '';
-  document.getElementById('t2').className = current === 2 ? 'active' : '';
-  const shopRec = myShop();
-  const content = document.getElementById('content');
+  $('t1').className = current === 1 ? 'active' : '';
+  $('t2').className = current === 2 ? 'active' : '';
+  $('ordersView').style.display = current === 1 ? 'block' : 'none';
+  $('productsView').style.display = current === 2 ? 'block' : 'none';
 
-  if (!shopRec) {
-    document.getElementById('shopName').textContent = '';
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي محل. تواصل مع الإدارة.</div>';
-    content.innerHTML = '';
+  if (!validShop()) {
+    $('shopName').textContent = '';
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي محل. تواصل مع الإدارة.</div>';
+    $('info').textContent = '';
+    $('ordersList').innerHTML = '';
+    $('prodList').innerHTML = '';
     return;
   }
 
-  const shop = shopRec.name;
-  const ok = !!(shopRec.paidUntil && shopRec.paidUntil > Date.now());
-  document.getElementById('shopName').textContent = shop;
-
-  if (ok) {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(shopRec.paidUntil).toLocaleDateString('ar-SY') + '</div>';
-  } else if (shopRec.paidUntil) {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (10 دولار بالشهر)</div>';
+  $('shopName').textContent = member.name;
+  if (subOk()) {
+    $('subBar').innerHTML = '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(member.paidUntil).toLocaleDateString('ar-SY') + '</div>';
+  } else if (member.paidUntil) {
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (10 دولار بالشهر)</div>';
   } else {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (10 دولار بالشهر)</div>';
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (10 دولار بالشهر)</div>';
   }
-
-  if (current === 1) { renderOrders(shop, ok); } else { renderProducts(shop); }
+  renderOrders();
+  renderProducts();
 }
 
-function renderOrders(shop, ok) {
-  const content = document.getElementById('content');
-  const mine = allOrders.filter(function(o) {
-    return (o.state === 'new' || o.state === 'cooking') &&
-      o.items.some(function(i) { return i.shop === shop; });
+function renderOrders() {
+  if (!validShop()) return;
+  const shop = member.name;
+  const ok = subOk();
+  const mine = shopOrders.filter(function(o) { return o.state === 'new' || o.state === 'cooking'; });
+  mine.sort(function(a, b) {
+    const ta = a.createdAt ? a.createdAt.seconds : 9999999999;
+    const tb = b.createdAt ? b.createdAt.seconds : 9999999999;
+    return ta - tb;
   });
-  let html = '<div class="info">عدد الطلبات الحالية: ' + mine.length + '</div>';
-  if (mine.length === 0) {
-    content.innerHTML = html + '<div class="empty">لا يوجد طلبات حالياً</div>';
-    return;
-  }
-  html += mine.map(function(o) {
-    const items = o.items.filter(function(i) { return i.shop === shop; })
-      .map(function(i) { return '<div class="item">• ' + i.n + ' × ' + i.q + '</div>'; }).join('');
+  $('info').textContent = 'عدد الطلبات الحالية: ' + mine.length;
+  if (mine.length === 0) { $('ordersList').innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>'; return; }
+
+  $('ordersList').innerHTML = mine.map(function(o) {
+    const items = (o.items || []).filter(function(i) { return i.shop === shop; })
+      .map(function(i) { return '<div class="item">• ' + esc(i.n) + ' × ' + esc(i.q) + '</div>'; }).join('');
     let btn;
     if (o.state === 'new') {
-      btn = '<button class="act" ' + (ok ? '' : 'disabled') + ' data-id="' + o.id + '" data-s="cooking">' +
+      btn = '<button class="act" ' + (ok ? '' : 'disabled') + ' data-id="' + esc(o.id) + '" data-s="cooking">' +
         (ok ? 'قبول الطلب' : 'الاشتراك غير مفعّل') + '</button>';
     } else {
-      btn = '<button class="act done" data-id="' + o.id + '" data-s="ready">جاهز للتسليم</button>';
+      btn = '<button class="act done" data-id="' + esc(o.id) + '" data-s="ready">جاهز للتسليم</button>';
     }
-    return '<div class="order"><span class="status ' + o.state + '">' + labels[o.state] + '</span>' +
-      '<h3>طلب رقم ' + o.id.slice(0, 6) + '</h3>' + items +
-      '<div class="addr">📍 ' + o.address + '</div>' + btn + '</div>';
+    return '<div class="order"><span class="status ' + esc(o.state) + '">' + esc(labels[o.state]) + '</span>' +
+      '<h3>طلب رقم ' + esc(o.id.slice(0, 6)) + '</h3>' + items +
+      '<div class="addr">📍 ' + esc(o.address) + '</div>' + btn + '</div>';
   }).join('');
-  content.innerHTML = html;
 }
 
-function renderProducts(shop) {
-  const content = document.getElementById('content');
-  const mine = products.filter(function(p) { return p.ownerEmail === myEmail; });
-  const editing = editId ? mine.find(function(p) { return p.id === editId; }) : null;
-
-  let html = '<div class="add"><b>' + (editing ? 'تعديل المنتج' : 'إضافة منتج جديد') + '</b><br>' +
-    '<input id="pName" placeholder="اسم المنتج" value="' + (editing ? editing.n.replace(/"/g, '&quot;') : '') + '">' +
-    '<input id="pPrice" type="number" inputmode="numeric" placeholder="السعر بالليرة" value="' + (editing ? editing.p : '') + '">' +
-    '<input id="pType" placeholder="النوع: مطعم أو سوبر ماركت" value="' + (editing ? editing.type : 'مطعم') + '">' +
-    '<button data-act="save">' + (editing ? 'حفظ التعديل' : 'إضافة') + '</button>' +
-    (editing ? '<button data-act="cancel" style="background:#888;margin-top:8px">إلغاء</button>' : '') +
-    '</div>';
-
-  if (mine.length === 0) {
-    html += '<div class="empty">لا يوجد منتجات بعد. أضف أول منتج.</div>';
-  } else {
-    html += mine.map(function(p) {
-      return '<div class="prod"><h3>' + p.n + '</h3><div class="price">' + fmt(p.p) + '</div>' +
-        '<div style="color:#666; font-size: 14px;">' + p.type + '</div>' +
-        '<button class="btn edit" data-act="edit" data-id="' + p.id + '">تعديل</button>' +
-        '<button class="btn del" data-act="del" data-id="' + p.id + '">حذف</button></div>';
-    }).join('');
-  }
-  content.innerHTML = html;
+function renderProducts() {
+  if (!validShop()) return;
+  if (myProducts.length === 0) { $('prodList').innerHTML = '<div class="empty">لا يوجد منتجات بعد. أضف أول منتج.</div>'; return; }
+  $('prodList').innerHTML = myProducts.map(function(p) {
+    return '<div class="prod"><h3>' + esc(p.n) + '</h3><div class="price">' + fmt(p.p) + '</div>' +
+      '<div style="color:#666">' + esc(p.type) + '</div>' +
+      '<button class="btn edit" data-act="edit" data-id="' + esc(p.id) + '">تعديل</button>' +
+      '<button class="btn del" data-act="del" data-id="' + esc(p.id) + '">حذف</button></div>';
+  }).join('');
 }
 
-function handleRoleChange() {
-  localStorage.removeItem('sb_role');
-  location.href = 'index.html?choose=1';
+function resetForm() {
+  editId = null;
+  $('pName').value = '';
+  $('pPrice').value = '';
+  $('pType').value = 'مطعم';
+  $('formTitle').textContent = 'إضافة منتج جديد';
+  $('saveProd').textContent = 'إضافة';
+  $('cancelProd').style.display = 'none';
 }
 
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { 
-    signOut(auth); 
-    showToast('تم تسجيل الخروج');
-    return; 
-  }
-  if (t.id === 'changeRoleGlobal') { handleRoleChange(); return; }
-  if (t.dataset.tab) { current = Number(t.dataset.tab); editId = null; render(); return; }
+  if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
+  if (t.dataset.tab) { current = Number(t.dataset.tab); render(); return; }
 
   if (t.classList.contains('act') && !t.disabled) {
-    await updateDoc(doc(db, 'orders', t.dataset.id), { state: t.dataset.s });
-    showToast('تم تحديث حالة الطلب بنجاح');
+    try {
+      await updateDoc(doc(db, 'orders', t.dataset.id), { state: t.dataset.s });
+    } catch (err) {
+      alert('صار خطأ، جرب مرة ثانية');
+      console.error(err);
+    }
+    return;
+  }
+
+  if (t.id === 'cancelProd') { resetForm(); return; }
+
+  if (t.id === 'saveProd') {
+    if (!validShop()) return;
+    const n = $('pName').value.trim();
+    const p = Number($('pPrice').value);
+    const type = $('pType').value;
+    if (!n || !(p > 0)) { alert('اكتب اسم المنتج وسعراً صحيحاً'); return; }
+    try {
+      if (editId) {
+        await updateDoc(doc(db, 'products', editId), { n: n, p: p, type: type, shop: member.name, ownerEmail: myEmail });
+      } else {
+        await addDoc(collection(db, 'products'), { n: n, p: p, type: type, shop: member.name, ownerEmail: myEmail });
+      }
+      resetForm();
+    } catch (err) {
+      alert('صار خطأ، جرب مرة ثانية');
+      console.error(err);
+    }
     return;
   }
 
   const act = t.dataset.act;
-  if (!act) return;
-  const shopRec = myShop();
-  if (!shopRec) return;
-
-  if (act === 'save') {
-    const n = document.getElementById('pName').value.trim();
-    const p = Number(document.getElementById('pPrice').value);
-    let type = document.getElementById('pType').value.trim();
-    if (!n || !p || p <= 0) { showToast('اكتب اسم المنتج وسعراً صحيحاً', 'error'); return; }
-    if (type !== 'سوبر ماركت') type = 'مطعم';
+  if (act === 'edit') {
+    const p = myProducts.find(function(x) { return x.id === t.dataset.id; });
+    if (!p) return;
+    editId = p.id;
+    $('pName').value = p.n;
+    $('pPrice').value = p.p;
+    $('pType').value = p.type;
+    $('formTitle').textContent = 'تعديل المنتج';
+    $('saveProd').textContent = 'حفظ التعديل';
+    $('cancelProd').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+  if (act === 'del' && confirm('حذف هذا المنتج؟')) {
     try {
-      if (editId) {
-        await updateDoc(doc(db, 'products', editId), { n: n, p: p, type: type });
-        editId = null;
-        showToast('تم تعديل المنتج بنجاح');
-      } else {
-        await addDoc(collection(db, 'products'), {
-          n: n, p: p, type: type, shop: shopRec.name, ownerEmail: myEmail
-        });
-        showToast('تمت إضافة المنتج بنجاح');
-      }
+      await deleteDoc(doc(db, 'products', t.dataset.id));
     } catch (err) {
-      showToast('حدث خطأ، حاول مرة أخرى', 'error');
+      alert('صار خطأ، جرب مرة ثانية');
       console.error(err);
     }
-  }
-  if (act === 'edit') { editId = t.dataset.id; render(); }
-  if (act === 'cancel') { editId = null; render(); }
-  if (act === 'del' && confirm('حذف هذا المنتج؟')) {
-    try { 
-      await deleteDoc(doc(db, 'products', t.dataset.id)); 
-      showToast('تم حذف المنتج');
-    }
-    catch (err) { showToast('حدث خطأ، حاول مرة أخرى', 'error'); console.error(err); }
   }
 });
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.getElementById('loginBox').style.display !== 'none') { doLogin(); }
+  if (e.key === 'Enter' && $('loginBox').style.display !== 'none') { doLogin(); }
 });
 </script>
 </body>
