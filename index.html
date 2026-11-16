@@ -1,3 +1,6 @@
+سيريا بايك - الصفحة الرئيسية بأزرار كبيرة
+افتح ملف index.html على جيت هاب، وامسح كل شي، والصق هذا الكود كاملاً، واضغط Commit changes. شاشة اختيار الدور صارت بأربع أزرار كبيرة تملأ الشاشة، وفوقها لوجو سيبايك.
+مهم: لازم تكون رفعت logo.png وfavicon.png وapple-touch-icon.png على جيت هاب، وإذا ما رفعتهم الصفحة بتشتغل عادي بس اللوجو ما بيظهر.
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,20 +8,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>سيريا بايك</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2e7d32">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0b3a9c">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:80px; }
+  html, body { margin:0; }
+  body { font-family:Arial,sans-serif; background:#f4f4f4; }
   header { background:#2e7d32; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; position:relative; }
   #roleBtn { position:absolute; left:10px; top:12px; background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 12px; border-radius:8px; font-size:13px; }
-  #chooser { display:none; padding:20px; text-align:center; }
-  #chooser h2 { color:#2e7d32; }
-  #chooser p { color:#666; }
-  .role { display:block; width:100%; padding:18px; margin-bottom:12px; border:none; border-radius:14px; color:white; font-size:20px; font-weight:bold; }
+  #chooser { display:none; flex-direction:column; min-height:100vh; box-sizing:border-box; padding:20px 16px; gap:14px; background:white; }
+  #chooser .logo { text-align:center; }
+  #chooser .logo img { width:110px; height:110px; border-radius:24px; }
+  #chooser h2 { text-align:center; font-size:28px; margin:4px 0 0 0; color:#0b3a9c; }
+  #chooser p { text-align:center; font-size:17px; color:#555; margin:0 0 4px 0; }
+  .role { flex:1; min-height:110px; border:none; border-radius:20px; color:white; font-size:28px; font-weight:bold; }
+  .role small { display:block; font-size:16px; font-weight:normal; opacity:0.9; margin-top:6px; }
   .r-customer { background:#2e7d32; }
   .r-restaurant { background:#e65100; }
   .r-driver { background:#1565c0; }
   .r-admin { background:#4a148c; }
-  #customerApp { display:none; }
+  #customerApp { display:none; padding-bottom:80px; }
   .sections { display:flex; gap:10px; padding:12px; }
   .sections button { flex:1; padding:14px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
   .sections button.active { background:#2e7d32; color:white; }
@@ -52,15 +61,16 @@
 })();
 </script>
 
-<header>🚲 سيريا بايك<button id="roleBtn" style="display:none">تغيير الدور</button></header>
+<header id="topHeader" style="display:none">🚲 سيريا بايك<button id="roleBtn">تغيير الدور</button></header>
 
 <div id="chooser">
+  <div class="logo"><img src="logo.png" alt="Sybike" onerror="this.style.display='none'"></div>
   <h2>مين أنت؟</h2>
   <p>اختار دورك، وبنتذكر اختيارك المرة الجاية</p>
-  <button class="role r-customer" data-role="customer">🛒 أنا زبون</button>
-  <button class="role r-restaurant" data-role="restaurant">🍽️ أنا مطعم أو متجر</button>
-  <button class="role r-driver" data-role="driver">🚲 أنا سائق</button>
-  <button class="role r-admin" data-role="admin">⚙️ أنا المدير</button>
+  <button class="role r-customer" data-role="customer">🛒 أنا زبون<small>اطلب من المطاعم والمتاجر</small></button>
+  <button class="role r-restaurant" data-role="restaurant">🍽️ أنا مطعم أو متجر<small>استقبل الطلبات وأدر منتجاتك</small></button>
+  <button class="role r-driver" data-role="driver">🚲 أنا سائق<small>استلم الطلبات وأوصلها</small></button>
+  <button class="role r-admin" data-role="admin">⚙️ أنا المدير<small>لوحة التحكم</small></button>
 </div>
 
 <div id="customerApp">
@@ -114,15 +124,15 @@ const DELIVERY_FEE = 20000;
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
 
 function showChooser() {
-  document.getElementById('chooser').style.display = 'block';
+  document.getElementById('chooser').style.display = 'flex';
+  document.getElementById('topHeader').style.display = 'none';
   document.getElementById('customerApp').style.display = 'none';
-  document.getElementById('roleBtn').style.display = 'none';
 }
 
 function showCustomer() {
   document.getElementById('chooser').style.display = 'none';
+  document.getElementById('topHeader').style.display = 'block';
   document.getElementById('customerApp').style.display = 'block';
-  document.getElementById('roleBtn').style.display = 'block';
   startProducts();
   show(currentType);
 }
@@ -247,8 +257,9 @@ async function confirmOrder() {
 
 document.addEventListener('click', function(e) {
   const t = e.target;
-  if (t.dataset.role) {
-    const r = t.dataset.role;
+  const rb = t.closest('[data-role]');
+  if (rb) {
+    const r = rb.dataset.role;
     localStorage.setItem('sb_role', r);
     if (pages[r]) { location.href = pages[r]; } else { showCustomer(); }
     return;
@@ -271,3 +282,5 @@ if (saved === 'customer') { showCustomer(); } else { showChooser(); }
 </script>
 </body>
 </html>
+بعد ما تحفظ
+افتح الرابط بتبويب جديد. إذا كنت اخترت دور قبل هيك، التطبيق بيتذكره وبيفتح مباشرة على واجهتك، فإذا بدك تشوف شاشة الاختيار الكبيرة اضغط زر تغيير الدور من أي واجهة، أو افتح الرابط وبآخره ?choose=1.
