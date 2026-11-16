@@ -50,11 +50,11 @@
   #cartBar button { background:white; color:#1b5e20; border:none; padding:10px 18px; border-radius:10px; font-weight:bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: background 0.2s; }
   #cartBar button:hover { background: #f1f8e9; }
 
-  #cartPage { display:none; padding:16px; }
+  #cartPage, #trackingPage { display:none; padding:16px; }
   
   .row { background:white; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
   .row .qty { display: flex; align-items: center; }
-  .row .qty button { width:34px; height:34px; border:none; border-radius:50%; background:#e8f5e9; color: #2e7d32; font-size:18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .row .qty button { width:34px; height:34px; border:none; border-radius:50%; background:#e8f5e9; color: #2e7d32; font-size:18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content me; justify-content: center; }
   .row .qty span { margin:0 12px; font-weight:bold; font-size: 16px; }
 
   #total { background:white; border-radius:12px; padding:16px; font-size:16px; font-weight:bold; margin:16px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); line-height: 1.8; color: #444; }
@@ -70,7 +70,11 @@
   #confirm { width:100%; padding:14px; border:none; border-radius:12px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 12px rgba(46,125,50,0.3); transition: background 0.2s; margin-top: 5px; }
   #confirm:active { background: #1b5e20; }
 
-  #back { background:none; border:none; color:#2e7d32; font-size:16px; font-weight: bold; padding:4px 0 12px 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  #back, #backTrack { background:none; border:none; color:#2e7d32; font-size:16px; font-weight: bold; padding:4px 0 12px 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+
+  .track-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); text-align: center; }
+  .track-status { font-size: 20px; font-weight: bold; color: #1565c0; margin: 15px 0; }
+  .map-btn { display: inline-block; width: 100%; padding: 14px; background: #1565c0; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin-top: 15px; box-shadow: 0 4px 10px rgba(21,101,192,0.3); }
 </style>
 </head>
 <body>
@@ -121,11 +125,22 @@
     </div>
     <button id="confirm">تأكيد الطلب</button>
   </div>
+
+  <div id="trackingPage">
+    <button id="backTrack">← رجوع للرئيسية</button>
+    <h2>تتبع الطلب</h2>
+    <div class="track-card">
+      <div id="trackOrderNum" style="color:#666;"></div>
+      <div class="track-status" id="trackStatus">جاري متابعة الحالة...</div>
+      <div id="driverInfo" style="margin-top:10px; font-weight:bold; color:#333;"></div>
+      <div id="mapContainer"></div>
+    </div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -140,12 +155,20 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
+const stateLabels = {
+  'new': '⏳ بانتظار موافقة المطعم',
+  'ready': '🍳 الطلب قيد التحضير / جاهز للاستلام',
+  'onway': '🚴 السائق في الطريق إليك!',
+  'delivered': '✅ تم توصيل الطلب بنجاح'
+};
+
 let products = [];
 let loaded = false;
 let cart = {};
 let currentType = 'مطعم';
 let listening = false;
-let customerCoords = null; // لتخزين خط العرض وخط الطول للزبون
+let customerCoords = null;
+let activeOrderUnsub = null;
 const DELIVERY_FEE = 20000;
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
@@ -240,16 +263,17 @@ function renderCart() {
 
 function openCart() {
   document.getElementById('home').style.display = 'none';
+  document.getElementById('trackingPage').style.display = 'none';
   document.getElementById('cartPage').style.display = 'block';
   renderCart();
 }
 
 function closeCart() {
   document.getElementById('cartPage').style.display = 'none';
+  document.getElementById('trackingPage').style.display = 'none';
   document.getElementById('home').style.display = 'block';
 }
 
-// دالة تحديد الموقع الجغرافي للزبون
 function getMyLocation() {
   if (!navigator.geolocation) {
     alert('متصفحك لا يدعم تحديد الموقع الجغرافي');
@@ -275,6 +299,38 @@ function getMyLocation() {
   );
 }
 
+function startTrackingOrder(orderId) {
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('cartPage').style.display = 'none';
+  document.getElementById('trackingPage').style.display = 'block';
+  document.getElementById('trackOrderNum').textContent = 'رقم الطلب: ' + orderId.slice(0, 6);
+
+  if (activeOrderUnsub) activeOrderUnsub();
+
+  activeOrderUnsub = onSnapshot(doc(db, 'orders', orderId), function(docSnap) {
+    if (!docSnap.exists()) return;
+    const data = docSnap.data();
+    
+    document.getElementById('trackStatus').textContent = stateLabels[data.state] || data.state;
+    
+    if (data.driver) {
+      document.getElementById('driverInfo').textContent = 'السائق: 🚲 ' + data.driver;
+    } else {
+      document.getElementById('driverInfo').textContent = '';
+    }
+
+    const mapBox = document.getElementById('mapContainer');
+    if (data.state === 'onway' && data.driverLocation) {
+      const lat = data.driverLocation.lat;
+      const lng = data.driverLocation.lng;
+      const mapsUrl = 'https://www.google.com/maps?q=' + lat + ',' + lng;
+      mapBox.innerHTML = '<a href="' + mapsUrl + '" target="_blank" class="map-btn">📍 عرض موقع السائق المباشر على الخريطة</a>';
+    } else {
+      mapBox.innerHTML = '';
+    }
+  });
+}
+
 async function confirmOrder() {
   const name = document.getElementById('custName').value.trim();
   const addr = document.getElementById('custAddr').value.trim();
@@ -289,7 +345,7 @@ async function confirmOrder() {
     const ref = await addDoc(collection(db, 'orders'), {
       customer: name,
       address: addr,
-      location: customerCoords || null, // حفظ الإحداثيات إن وجدت لتتبع السائق
+      location: customerCoords || null,
       items: items,
       subtotal: totals().sum,
       deliveryFee: DELIVERY_FEE,
@@ -297,13 +353,12 @@ async function confirmOrder() {
       state: 'new',
       createdAt: serverTimestamp()
     });
-    alert('تم استلام طلبك! رقم الطلب: ' + ref.id.slice(0, 6));
     cart = {};
     customerCoords = null;
     document.getElementById('custName').value = '';
     document.getElementById('custAddr').value = '';
     updateBar();
-    closeCart();
+    startTrackingOrder(ref.id);
   } catch (e) {
     alert('صار خطأ، جرب مرة ثانية');
     console.error(e);
@@ -324,7 +379,7 @@ document.addEventListener('click', function(e) {
   if (t.classList.contains('addBtn')) { add(t.dataset.id); return; }
   if (t.classList.contains('chgBtn')) { change(t.dataset.id, Number(t.dataset.d)); return; }
   if (t.id === 'openCartBtn') { openCart(); return; }
-  if (t.id === 'back') { closeCart(); return; }
+  if (t.id === 'back' || t.id === 'backTrack') { closeCart(); return; }
   if (t.id === 'getLocBtn') { getMyLocation(); return; }
   if (t.id === 'confirm') { confirmOrder(); return; }
 });
