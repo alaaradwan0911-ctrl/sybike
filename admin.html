@@ -7,42 +7,61 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#4a148c">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
-  header { background:#4a148c; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
-  #loginBox { padding:20px; }
-  #loginBox h2 { text-align:center; color:#4a148c; }
-  #loginBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
-  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#4a148c; color:white; font-size:17px; font-weight:bold; }
-  #loginErr { color:#c62828; text-align:center; margin-top:10px; }
-  #app { display:none; }
-  .topBtns { display:flex; gap:8px; margin:10px 12px 0 12px; }
-  .topBtns button { background:white; color:#4a148c; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; }
-  .stats { display:flex; flex-wrap:wrap; gap:8px; padding:12px; }
-  .stat { flex:1 1 40%; background:white; border-radius:12px; padding:10px; text-align:center; font-size:14px; }
-  .stat b { display:block; font-size:18px; color:#4a148c; margin-top:4px; }
-  .tabs { display:flex; gap:8px; padding:0 12px; }
-  .tabs button { flex:1; padding:12px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
-  .tabs button.active { background:#4a148c; color:white; }
-  .box { padding:12px; }
-  .card { background:white; border-radius:12px; padding:14px; margin-bottom:10px; }
-  .card h3 { margin:0 0 6px 0; }
-  .line { padding:3px 0; color:#444; }
-  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:13px; margin-bottom:6px; }
-  .new { background:#ffe0b2; color:#e65100; }
-  .cooking { background:#fff9c4; color:#f57f17; }
-  .ready { background:#bbdefb; color:#1565c0; }
-  .onway { background:#e1bee7; color:#6a1b9a; }
-  .delivered { background:#c8e6c9; color:#2e7d32; }
-  .active-sub { background:#c8e6c9; color:#2e7d32; }
-  .expired-sub { background:#ffcdd2; color:#c62828; }
-  .add { background:white; border-radius:12px; padding:14px; margin-bottom:12px; }
-  .add input, .add select { width:100%; box-sizing:border-box; padding:12px; margin-bottom:8px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
-  .add button { width:100%; padding:12px; border:none; border-radius:8px; background:#4a148c; color:white; font-size:16px; font-weight:bold; }
-  .btn { padding:10px 14px; border:none; border-radius:8px; color:white; font-size:15px; margin-top:6px; margin-left:6px; }
+  body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
+  header { background:linear-gradient(135deg, #4a148c, #6a1b9a); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  
+  #loginBox { max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  #loginBox h2 { text-align:center; color:#4a148c; margin-top:0; margin-bottom: 20px; font-size: 20px; }
+  #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
+  #loginBox input:focus { border-color: #4a148c; outline: none; background: #fff; }
+  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#4a148c; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(74,20,140,0.3); transition: background 0.2s; }
+  #loginBox button:active { background: #38006b; }
+  #loginErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
+  
+  #app { display:none; max-width: 650px; margin: 0 auto; }
+  
+  .topBtns { display:flex; justify-content: space-between; padding: 12px 16px 0 16px; }
+  #logout { background:white; color:#4a148c; border:1px solid #4a148c; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
+  #logout:hover { background: #f3e5f5; }
+  #changeRole { background:white; color:#555; border:1px solid #ddd; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
+  #changeRole:hover { background: #f1f3f5; }
+
+  .stats { display:flex; flex-wrap:wrap; gap:10px; padding:12px 16px; }
+  .stat { flex:1 1 45%; background:white; border-radius:14px; padding:14px; text-align:center; font-size:14px; color: #666; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); }
+  .stat b { display:block; font-size:18px; color:#4a148c; margin-top:6px; }
+  
+  .tabs { display:flex; gap:10px; padding:4px 16px 12px 16px; }
+  .tabs button { flex:1; padding:14px; border:none; border-radius:12px; background:white; font-size:16px; font-weight:bold; color: #666; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s; }
+  .tabs button.active { background:#4a148c; color:white; box-shadow: 0 4px 12px rgba(74,20,140,0.3); }
+
+  .box { padding: 0 16px; }
+  
+  .card { background:white; border-radius:14px; padding:18px; margin-bottom:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
+  .card h3 { margin:0 0 8px 0; font-size: 18px; color: #222; }
+  .line { padding:5px 0; color:#444; font-size: 15px; border-bottom: 1px dashed #f0f0f0; }
+  .line:last-of-type { border-bottom: none; }
+  
+  .badge { display:inline-block; padding:5px 14px; border-radius:20px; font-size:13px; font-weight: bold; margin-bottom:10px; }
+  .new { background:#fff3e0; color:#e65100; }
+  .cooking { background:#fffde7; color:#f57f17; }
+  .ready { background:#e3f2fd; color:#1565c0; }
+  .onway { background:#f3e5f5; color:#6a1b9a; }
+  .delivered { background:#e8f5e9; color:#2e7d32; }
+  .active-sub { background:#e8f5e9; color:#2e7d32; }
+  .expired-sub { background:#ffebee; color:#c62828; }
+  
+  .add { background:white; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .add input, .add select { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; font-size:15px; background: #fafafa; }
+  .add input:focus, .add select:focus { border-color: #4a148c; outline: none; background: #fff; }
+  .add button { width:100%; padding:14px; border:none; border-radius:10px; background:#4a148c; color:white; font-size:16px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(74,20,140,0.2); }
+  
+  .btn { padding:10px 16px; border:none; border-radius:8px; color:white; font-size:14px; font-weight: bold; margin-top:12px; margin-left:8px; cursor: pointer; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.9; }
   .pay { background:#2e7d32; }
   .mail { background:#1565c0; }
   .del { background:#c62828; }
-  .empty { text-align:center; color:#888; padding:30px; }
+  
+  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 </style>
 </head>
 <body>
@@ -66,7 +85,7 @@
     <div class="stat">قيد التنفيذ<b id="sActive">0</b></div>
     <div class="stat">المبيعات المسلّمة<b id="sSales">0</b></div>
     <div class="stat">اشتراكات مفعّلة<b id="sSubs">0</b></div>
-    <div class="stat">دخلكم من الاشتراكات المفعّلة<b id="sIncome">0</b></div>
+    <div class="stat" style="flex: 1 1 100%;">دخلكم من الاشتراكات المفعّلة<b id="sIncome">0</b></div>
   </div>
   <div class="tabs">
     <button id="t1" class="active" data-tab="1">الطلبات</button>
