@@ -8,69 +8,38 @@
 <link rel="icon" href="favicon.png">
 <meta name="theme-color" content="#1565c0">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
-  header { background:linear-gradient(135deg, #1565c0, #1976d2); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
-  header span { flex: 1; text-align: center; }
-
-  .global-top-bar { padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
-  #changeRoleGlobal { background: white; color: #555; border: 1px solid #ddd; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
-  #changeRoleGlobal:hover { background: #f1f3f5; }
-  
-  #loginBox { max-width: 400px; margin: 30px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-  #loginBox h2 { text-align:center; color:#1565c0; margin-top:0; margin-bottom: 20px; font-size: 20px; }
-  #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
-  #loginBox input:focus { border-color: #1565c0; outline: none; background: #fff; }
-  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#1565c0; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(21,101,192,0.3); transition: background 0.2s; }
-  #loginBox button:active { background: #0d47a1; }
-  #loginErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
-  
-  #app { display:none; max-width: 600px; margin: 0 auto; }
-  
-  .topBtns { display:flex; justify-content: space-between; padding: 12px 16px 0 16px; }
-  #logout { background:white; color:#1565c0; border:1px solid #1565c0; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
-  #logout:hover { background: #e3f2fd; }
-
-  .who { text-align:center; font-size:22px; font-weight:bold; color:#222; padding:15px 10px 5px 10px; }
-  
-  .sub { margin:10px 16px; padding:14px; border-radius:12px; text-align:center; font-weight:bold; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
-  .sub.ok { background:#e8f5e9; color:#2e7d32; border: 1px solid #c8e6c9; }
-  .sub.bad { background:#ffebee; color:#c62828; border: 1px solid #ffcdd2; }
-  
-  .stats { display:flex; gap:12px; padding:4px 16px 12px 16px; }
-  .stat { flex:1; background:white; border-radius:14px; padding:16px; text-align:center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); font-size: 14px; color: #666; }
-  .stat b { display:block; font-size:20px; color:#1565c0; margin-top:6px; }
-  
-  .order { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
-  .order h3 { margin:0 0 10px 0; font-size: 18px; color: #222; }
-  .line { padding:6px 0; color:#444; font-size: 15px; border-bottom: 1px dashed #f0f0f0; }
-  .line:last-of-type { border-bottom: none; }
-  
-  .status { display:inline-block; padding:5px 14px; border-radius:20px; font-size:13px; font-weight: bold; margin-bottom:10px; }
-  .ready { background:#e3f2fd; color:#1565c0; }
-  .onway { background:#fffde7; color:#f57f17; }
-  
-  .order button { width:100%; padding:14px; margin-top:14px; border:none; border-radius:10px; font-size:16px; font-weight:bold; color:white; background:#1565c0; cursor: pointer; box-shadow: 0 4px 10px rgba(21,101,192,0.2); transition: background 0.2s; }
-  .order button.done { background:#2e7d32; box-shadow: 0 4px 10px rgba(46,125,50,0.2); }
-  .order button:disabled { background:#e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; }
-  
-  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-
-  /* تصميم التنبيهات العائمة (Toast) */
-  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
-  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-  #toast.success { background: #2e7d32; }
-  #toast.error { background: #c62828; }
+  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
+  header { background:#1565c0; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
+  #loginBox { padding:20px; }
+  #loginBox h2 { text-align:center; color:#1565c0; }
+  #loginBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#1565c0; color:white; font-size:17px; font-weight:bold; }
+  #loginErr { color:#c62828; text-align:center; margin-top:10px; }
+  #app { display:none; }
+  .topBtns { display:flex; gap:8px; margin:10px 12px 0 12px; }
+  .topBtns button { background:white; color:#1565c0; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; }
+  .who { text-align:center; font-size:20px; font-weight:bold; color:#1565c0; padding:12px; }
+  .sub { margin:0 12px 8px 12px; padding:12px; border-radius:10px; text-align:center; font-weight:bold; }
+  .sub.ok { background:#c8e6c9; color:#2e7d32; }
+  .sub.bad { background:#ffcdd2; color:#c62828; }
+  .stats { display:flex; gap:10px; padding:0 12px 12px 12px; }
+  .stat { flex:1; background:white; border-radius:12px; padding:12px; text-align:center; }
+  .stat b { display:block; font-size:20px; color:#1565c0; margin-top:4px; }
+  .order { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
+  .order h3 { margin:0 0 8px 0; }
+  .line { padding:4px 0; color:#444; }
+  .line a { color:#1565c0; font-weight:bold; }
+  .status { display:inline-block; padding:4px 12px; border-radius:20px; font-size:14px; margin-bottom:8px; }
+  .ready { background:#bbdefb; color:#1565c0; }
+  .onway { background:#fff9c4; color:#f57f17; }
+  .order button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#1565c0; }
+  .order button.done { background:#2e7d32; }
+  .order button:disabled { background:#bbb; }
+  .empty { text-align:center; color:#888; padding:30px; }
 </style>
 </head>
 <body>
-
-<div id="toast"></div>
-
-<div class="global-top-bar">
-  <button id="changeRoleGlobal">🔄 تغيير الدور</button>
-</div>
-
-<header><span>🚲 واجهة السائق</span></header>
+<header>🚲 واجهة السائق</header>
 
 <div id="loginBox">
   <h2>تسجيل دخول السائق</h2>
@@ -83,6 +52,7 @@
 <div id="app">
   <div class="topBtns">
     <button id="logout">خروج</button>
+    <button id="changeRole">تغيير الدور</button>
   </div>
   <div class="who" id="who"></div>
   <div id="subBar"></div>
@@ -96,7 +66,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -112,237 +82,156 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 const labels = {ready:'جاهز للاستلام', onway:'في الطريق للزبون'};
-let allOrders = [];
-let members = [];
 let myEmail = '';
-let started = false;
-let watchId = null;
+let member = null;
+let readyOrders = [];
+let mineOrders = [];
+let unsubs = [];
+let orderUnsubs = [];
 
+function $(id) { return document.getElementById(id); }
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
+function validDriver() { return member && member.type === 'driver'; }
+function subOk() { return !!(member && member.paidUntil && member.paidUntil > Date.now()); }
 
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = 'show ' + type;
-  setTimeout(function() {
-    toast.className = '';
-  }, 3000);
+function stopOrders() {
+  orderUnsubs.forEach(function(f) { f(); });
+  orderUnsubs = [];
+  readyOrders = [];
+  mineOrders = [];
 }
 
-function myDriver() {
-  return members.find(function(m) {
-    return m.type === 'driver' && m.email && m.email.toLowerCase() === myEmail;
-  });
+function stopAll() {
+  unsubs.forEach(function(f) { f(); });
+  unsubs = [];
+  stopOrders();
+  member = null;
 }
 
-function startListening() {
-  if (started) return;
-  started = true;
-  onSnapshot(collection(db, 'orders'), function(snap) {
-    allOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+function startOrders() {
+  if (orderUnsubs.length) return;
+  orderUnsubs.push(onSnapshot(query(collection(db, 'orders'), where('state', '==', 'ready')), function(snap) {
+    readyOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
     render();
-  });
-  onSnapshot(collection(db, 'members'), function(snap) {
-    members = snap.docs.map(function(d) { const m = d.data(); m.id = d.id; return m; });
+  }, function(err) { console.error(err); }));
+  orderUnsubs.push(onSnapshot(query(collection(db, 'orders'), where('driverEmail', '==', myEmail)), function(snap) {
+    mineOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
     render();
-  });
+  }, function(err) { console.error(err); }));
+}
+
+function listenMember() {
+  unsubs.push(onSnapshot(doc(db, 'members', myEmail), function(snap) {
+    member = snap.exists() ? snap.data() : null;
+    if (validDriver()) { startOrders(); } else { stopOrders(); }
+    render();
+  }, function(err) { console.error(err); member = null; render(); }));
 }
 
 onAuthStateChanged(auth, function(user) {
+  stopAll();
   if (user) {
     myEmail = (user.email || '').toLowerCase();
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    startListening();
+    $('loginBox').style.display = 'none';
+    $('app').style.display = 'block';
+    listenMember();
     render();
   } else {
     myEmail = '';
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
-    stopTracking();
+    $('loginBox').style.display = 'block';
+    $('app').style.display = 'none';
   }
 });
 
 async function doLogin() {
-  const email = document.getElementById('email').value.trim();
-  const pass = document.getElementById('pass').value;
-  document.getElementById('loginErr').textContent = '';
+  const email = $('email').value.trim();
+  const pass = $('pass').value;
+  $('loginErr').textContent = '';
   try {
     await signInWithEmailAndPassword(auth, email, pass);
-    showToast('مرحباً بك يا سائق');
   } catch (e) {
-    document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
-  }
-}
-
-function startTracking(orderId) {
-  if (watchId !== null) return;
-  if (!navigator.geolocation) return;
-
-  watchId = navigator.geolocation.watchPosition(
-    async function(pos) {
-      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-      try {
-        await updateDoc(doc(db, 'orders', orderId), { driverLocation: coords });
-      } catch (err) {
-        console.error("خطأ في تحديث موقع السائق:", err);
-      }
-    },
-    function(err) {
-      console.error("خطأ في تحديد موقع GPS:", err);
-    },
-    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
-  );
-}
-
-function stopTracking() {
-  if (watchId !== null) {
-    navigator.geolocation.clearWatch(watchId);
-    watchId = null;
-  }
-}
-
-async function updateState(id, newState, currentDriverName) {
-  try {
-    const updateData = { state: newState };
-    if (newState === 'onway') {
-      updateData.driver = currentDriverName;
-      updateData.driverEmail = myEmail;
-      startTracking(id);
-      showToast('تم استلام الطلب وبدء تتبع الموقع');
-    } else if (newState === 'delivered') {
-      stopTracking();
-      showToast('تم توصيل الطلب بنجاح');
-    }
-    await updateDoc(doc(db, 'orders', id), updateData);
-  } catch (e) {
-    showToast('حدث خطأ أثناء تحديث حالة الطلب', 'error');
-    console.error(e);
+    $('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
   }
 }
 
 function render() {
-  const drv = myDriver();
-  const ordersBox = document.getElementById('orders');
+  const box = $('orders');
 
-  if (!drv) {
-    document.getElementById('who').textContent = '';
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي سائق. تواصل مع الإدارة.</div>';
-    document.getElementById('count').textContent = '0';
-    document.getElementById('earn').textContent = fmt(0);
-    ordersBox.innerHTML = '';
+  if (!validDriver()) {
+    $('who').textContent = '';
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي سائق. تواصل مع الإدارة.</div>';
+    $('count').textContent = '0';
+    $('earn').textContent = fmt(0);
+    box.innerHTML = '';
     return;
   }
 
-  const me = drv.name;
-  const ok = !!(drv.paidUntil && drv.paidUntil > Date.now());
-  document.getElementById('who').textContent = '🚲 ' + me;
-
+  const ok = subOk();
+  $('who').textContent = '🚲 ' + member.name;
   if (ok) {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(drv.paidUntil).toLocaleDateString('ar-SY') + '</div>';
-  } else if (drv.paidUntil) {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (5 دولار بالشهر)</div>';
+    $('subBar').innerHTML = '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(member.paidUntil).toLocaleDateString('ar-SY') + '</div>';
+  } else if (member.paidUntil) {
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (5 دولار بالشهر)</div>';
   } else {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (5 دولار بالشهر)</div>';
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (5 دولار بالشهر)</div>';
   }
 
-  function isMine(o) { return o.driverEmail === myEmail || (!o.driverEmail && o.driver === me); }
+  const done = mineOrders.filter(function(o) { return o.state === 'delivered'; });
+  $('count').textContent = done.length;
+  $('earn').textContent = fmt(done.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
 
-  const mineDone = allOrders.filter(function(o) { return o.state === 'delivered' && isMine(o); });
-  document.getElementById('count').textContent = mineDone.length;
-  document.getElementById('earn').textContent = fmt(mineDone.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
+  const active = mineOrders.filter(function(o) { return o.state === 'onway'; });
+  const list = active.concat(readyOrders);
 
-  const list = allOrders.filter(function(o) {
-    if (o.state === 'ready') return true;
-    if ((o.state === 'onway' || o.state === 'delivered') && isMine(o)) return true;
-    return false;
-  });
+  if (list.length === 0) { box.innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>'; return; }
 
-  if (list.length === 0) {
-    ordersBox.innerHTML = '<div class="empty">لا توجد طلبات متاحة حالياً</div>';
-    return;
-  }
-
-  ordersBox.innerHTML = list.map(function(o) {
-    const itemsHtml = (o.items || []).map(function(i) {
-      return '<div class="line">' + esc(i.n) + ' (×' + i.q + ') - ' + esc(i.shop) + '</div>';
-    }).join('');
-
-    let btnHtml = '';
-    let statusClass = 'ready';
-    let statusText = labels[o.state] || o.state;
-
+  box.innerHTML = list.map(function(o) {
+    const shops = (o.shops || []).map(esc).join('، ');
+    let btn;
     if (o.state === 'ready') {
-      btnHtml = '<button class="takeBtn" data-id="' + o.id + '" ' + (!ok ? 'disabled' : '') + '>استلام الطلب والتوجه للزبون</button>';
-      if (!ok) btnHtml += '<p style="color:#c62828; font-size:12px; text-align:center; margin-top:6px;">عليك تفعيل الاشتراك لاستلام الطلبات</p>';
-    } else if (o.state === 'onway') {
-      statusClass = 'onway';
-      btnHtml = '<button class="done doneBtn" data-id="' + o.id + '">تم التوصيل بنجاح</button>';
+      btn = '<button class="act" ' + (ok ? '' : 'disabled') + ' data-id="' + esc(o.id) + '" data-s="onway">' +
+        (ok ? 'استلمت الطلب' : 'الاشتراك غير مفعّل') + '</button>';
     } else {
-      statusText = 'تم التوصيل';
-      btnHtml = '<button disabled style="background:#e0e0e0; color:#666;">منتهي</button>';
+      btn = '<button class="act done" data-id="' + esc(o.id) + '" data-s="delivered">تم التوصيل</button>';
     }
-
-    return '<div class="order">' +
-      '<div class="status ' + statusClass + '">' + statusText + '</div>' +
-      '<h3>طلب للزبون: ' + esc(o.customer) + '</h3>' +
-      '<div class="line"><b>العنوان:</b> ' + esc(o.address) + '</div>' +
-      '<div class="line"><b>أجرة التوصيل:</b> ' + fmt(o.deliveryFee) + '</div>' +
-      '<div style="margin-top:10px; font-weight:bold; font-size:14px; color:#555;">الأصناف:</div>' +
-      itemsHtml +
-      btnHtml +
-    '</div>';
+    const map = (typeof o.lat === 'number' && typeof o.lng === 'number')
+      ? '<div class="line"><a href="https://www.google.com/maps?q=' + o.lat + ',' + o.lng + '" target="_blank" rel="noopener">🗺️ افتح موقع الزبون بالخريطة</a></div>'
+      : '';
+    return '<div class="order"><span class="status ' + esc(o.state) + '">' + esc(labels[o.state]) + '</span>' +
+      '<h3>طلب رقم ' + esc(o.id.slice(0, 6)) + '</h3>' +
+      '<div class="line">🍽️ من: ' + shops + '</div>' +
+      '<div class="line">👤 الزبون: ' + esc(o.customer) + '</div>' +
+      '<div class="line">📍 إلى: ' + esc(o.address) + '</div>' + map +
+      '<div class="line">💵 المبلغ المطلوب من الزبون: ' + fmt(o.total || 0) + '</div>' +
+      '<div class="line">🚲 أجرتك من هذا الطلب: ' + fmt(o.deliveryFee || 0) + '</div>' + btn + '</div>';
   }).join('');
 }
 
-function handleRoleChange() {
-  localStorage.removeItem('sb_role');
-  location.href = 'index.html?choose=1';
-}
-
-document.addEventListener('click', function(e) {
+document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { 
-    signOut(auth); 
-    stopTracking(); 
-    showToast('تم تسجيل الخروج');
-    return; 
-  }
-  if (t.id === 'changeRoleGlobal') { handleRoleChange(); return; }
-  
-  if (t.classList.contains('takeBtn')) {
-    const drv = myDriver();
-    if (!drv || !(drv.paidUntil && drv.paidUntil > Date.now())) {
-      showToast('يجب تفعيل اشتراكك أولاً لاستلام الطلبات', 'error');
-      return;
-    }
-    updateState(t.dataset.id, 'onway', drv.name);
-    return;
-  }
-  
-  if (t.classList.contains('doneBtn')) {
-    updateState(t.dataset.id, 'delivered');
-    return;
+  if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
+  if (!t.classList.contains('act') || t.disabled) return;
+  if (!validDriver()) { alert('هذا الإيميل غير مربوط بسائق'); return; }
+  const data = { state: t.dataset.s };
+  if (t.dataset.s === 'onway') { data.driver = member.name; data.driverEmail = myEmail; }
+  try {
+    await updateDoc(doc(db, 'orders', t.dataset.id), data);
+  } catch (err) {
+    alert('صار خطأ، جرب مرة ثانية (ممكن سائق ثاني استلم الطلب قبلك)');
+    console.error(err);
   }
 });
 
-document.getElementById('pass').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') doLogin();
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && $('loginBox').style.display !== 'none') { doLogin(); }
 });
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
 </script>
 </body>
 </html>
