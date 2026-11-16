@@ -7,44 +7,65 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#0b3a9c">
+<meta name="theme-color" content="#2e7d32">
 <style>
-  html, body { margin:0; }
-  body { font-family:Arial,sans-serif; background:#f4f4f4; }
-  header { background:#2e7d32; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; position:relative; }
-  #roleBtn { position:absolute; left:10px; top:12px; background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 12px; border-radius:8px; font-size:13px; }
-  #chooser { display:none; flex-direction:column; min-height:100vh; box-sizing:border-box; padding:20px 16px; gap:14px; background:white; }
-  #chooser .logo { text-align:center; }
-  #chooser .logo img { width:110px; height:110px; border-radius:24px; }
-  #chooser h2 { text-align:center; font-size:28px; margin:4px 0 0 0; color:#0b3a9c; }
-  #chooser p { text-align:center; font-size:17px; color:#555; margin:0 0 4px 0; }
-  .role { flex:1; min-height:110px; border:none; border-radius:20px; color:white; font-size:28px; font-weight:bold; }
-  .role small { display:block; font-size:16px; font-weight:normal; opacity:0.9; margin-top:6px; }
-  .r-customer { background:#2e7d32; }
-  .r-restaurant { background:#e65100; }
-  .r-driver { background:#1565c0; }
-  .r-admin { background:#4a148c; }
-  #customerApp { display:none; padding-bottom:80px; }
-  .sections { display:flex; gap:10px; padding:12px; }
-  .sections button { flex:1; padding:14px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
-  .sections button.active { background:#2e7d32; color:white; }
-  .list { padding:12px; }
-  .card { background:white; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
-  .card h3 { margin:0 0 4px 0; }
-  .card small { color:#666; }
-  .card .price { color:#2e7d32; font-weight:bold; margin-top:4px; }
-  .card button { background:#2e7d32; color:white; border:none; padding:10px 16px; border-radius:8px; }
-  .empty { text-align:center; color:#888; padding:30px; }
-  #cartBar { position:fixed; bottom:0; left:0; right:0; background:#1b5e20; color:white; padding:16px; display:flex; justify-content:space-between; align-items:center; font-size:17px; }
-  #cartBar button { background:white; color:#1b5e20; border:none; padding:10px 18px; border-radius:8px; font-weight:bold; }
-  #cartPage { display:none; padding:12px; }
-  .row { background:white; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
-  .row .qty button { width:32px; height:32px; border:none; border-radius:50%; background:#c8e6c9; font-size:18px; }
-  .row .qty span { margin:0 10px; font-weight:bold; }
-  #total { background:white; border-radius:10px; padding:14px; font-size:18px; font-weight:bold; margin:12px 0; }
-  .field { width:100%; box-sizing:border-box; padding:12px; margin-bottom:8px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
-  #confirm { width:100%; padding:14px; border:none; border-radius:10px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; }
-  #back { background:none; border:none; color:#2e7d32; font-size:16px; padding:8px; }
+  html, body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; color:#333; }
+  header { background:linear-gradient(135deg, #2e7d32, #388e3c); color:white; padding:18px 16px; text-align:center; font-size:22px; font-weight:bold; position:relative; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  
+  #roleBtn { position:absolute; left:12px; top:14px; background:rgba(255,255,255,0.2); color:white; border:none; padding:6px 14px; border-radius:8px; font-size:13px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+  #roleBtn:hover { background: rgba(255,255,255,0.3); }
+
+  #chooser { display:none; flex-direction:column; min-height:100vh; box-sizing:border-box; padding:24px 16px; gap:14px; background:#f8f9fa; max-width: 500px; margin: 0 auto; }
+  #chooser .logo { text-align:center; margin-top: 10px; }
+  #chooser .logo img { width:110px; height:110px; border-radius:24px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  #chooser h2 { text-align:center; font-size:26px; margin:10px 0 0 0; color:#1b5e20; }
+  #chooser p { text-align:center; font-size:15px; color:#666; margin:0 0 10px 0; }
+  
+  .role { flex:1; min-height:100px; border:none; border-radius:16px; color:white; font-size:24px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.12); transition: transform 0.1s, opacity 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 15px; }
+  .role:active { transform: scale(0.98); }
+  .role small { display:block; font-size:14px; font-weight:normal; opacity:0.9; margin-top:6px; }
+  .r-customer { background:linear-gradient(135deg, #2e7d32, #43a047); }
+  .r-restaurant { background:linear-gradient(135deg, #e65100, #f57c00); }
+  .r-driver { background:linear-gradient(135deg, #1565c0, #1976d2); }
+  .r-admin { background:linear-gradient(135deg, #4a148c, #6a1b9a); }
+
+  #customerApp { display:none; padding-bottom:90px; max-width: 600px; margin: 0 auto; }
+  
+  .sections { display:flex; gap:10px; padding:16px 16px 8px 16px; }
+  .sections button { flex:1; padding:14px; border:none; border-radius:12px; background:white; font-size:16px; font-weight:bold; color: #666; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s; }
+  .sections button.active { background:#2e7d32; color:white; box-shadow: 0 4px 12px rgba(46,125,50,0.3); }
+
+  .list { padding:8px 16px; }
+  
+  .card { background:white; border-radius:14px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); }
+  .card h3 { margin:0 0 4px 0; font-size: 18px; color: #222; }
+  .card small { color:#666; font-size: 13px; }
+  .card .price { color:#2e7d32; font-weight:bold; margin-top:6px; font-size: 16px; }
+  .card button { background:#2e7d32; color:white; border:none; padding:10px 18px; border-radius:10px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(46,125,50,0.2); transition: background 0.2s; }
+  .card button:active { background: #1b5e20; }
+
+  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin: 12px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+  #cartBar { position:fixed; bottom:0; left:0; right:0; background:#1b5e20; color:white; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; font-size:17px; font-weight: bold; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; box-sizing: border-box; }
+  #cartBar button { background:white; color:#1b5e20; border:none; padding:10px 18px; border-radius:10px; font-weight:bold; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: background 0.2s; }
+  #cartBar button:hover { background: #f1f8e9; }
+
+  #cartPage { display:none; padding:16px; }
+  
+  .row { background:white; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+  .row .qty { display: flex; align-items: center; }
+  .row .qty button { width:34px; height:34px; border:none; border-radius:50%; background:#e8f5e9; color: #2e7d32; font-size:18px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .row .qty span { margin:0 12px; font-weight:bold; font-size: 16px; }
+
+  #total { background:white; border-radius:12px; padding:16px; font-size:16px; font-weight:bold; margin:16px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.04); line-height: 1.8; color: #444; }
+  
+  .field { width:100%; box-sizing:border-box; padding:14px; margin-bottom:12px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: white; transition: border-color 0.2s; }
+  .field:focus { border-color: #2e7d32; outline: none; }
+
+  #confirm { width:100%; padding:14px; border:none; border-radius:12px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 12px rgba(46,125,50,0.3); transition: background 0.2s; margin-top: 5px; }
+  #confirm:active { background: #1b5e20; }
+
+  #back { background:none; border:none; color:#2e7d32; font-size:16px; font-weight: bold; padding:4px 0 12px 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 </style>
 </head>
 <body>
@@ -84,7 +105,7 @@
   </div>
 
   <div id="cartPage">
-    <button id="back">→ رجوع</button>
+    <button id="back">← رجوع</button>
     <h2>سلة الطلب</h2>
     <div id="cartItems"></div>
     <div id="total"></div>
@@ -201,11 +222,11 @@ function renderCart() {
       '<span>' + cart[i.id] + '</span>' +
       '<button class="chgBtn" data-id="' + i.id + '" data-d="-1">−</button></div></div>';
   }).join('');
-  document.getElementById('cartItems').innerHTML = rows || '<p>السلة فارغة</p>';
+  document.getElementById('cartItems').innerHTML = rows || '<p style="text-align:center; color:#888; padding:20px;">السلة فارغة</p>';
   const t = totals();
   const fee = t.count ? DELIVERY_FEE : 0;
   document.getElementById('total').innerHTML =
-    'المشتريات: ' + fmt(t.sum) + '<br>أجرة التوصيل: ' + fmt(fee) + '<br>المجموع: ' + fmt(t.sum + fee);
+    'المشتريات: ' + fmt(t.sum) + '<br>أجرة التوصيل: ' + fmt(fee) + '<br><span style="color:#2e7d32;">المجموع الكلي: ' + fmt(t.sum + fee) + '</span>';
 }
 
 function openCart() {
