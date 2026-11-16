@@ -62,6 +62,11 @@
   .field { width:100%; box-sizing:border-box; padding:14px; margin-bottom:12px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: white; transition: border-color 0.2s; }
   .field:focus { border-color: #2e7d32; outline: none; }
 
+  .loc-box { display: flex; gap: 8px; margin-bottom: 12px; }
+  .loc-box input { margin-bottom: 0; flex: 1; }
+  .loc-box button { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 0 14px; border-radius: 10px; font-weight: bold; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+  .loc-box button:hover { background: #c8e6c9; }
+
   #confirm { width:100%; padding:14px; border:none; border-radius:12px; background:#2e7d32; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 12px rgba(46,125,50,0.3); transition: background 0.2s; margin-top: 5px; }
   #confirm:active { background: #1b5e20; }
 
@@ -110,7 +115,10 @@
     <div id="cartItems"></div>
     <div id="total"></div>
     <input class="field" id="custName" placeholder="اسمك">
-    <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
+    <div class="loc-box">
+      <input class="field" id="custAddr" placeholder="عنوانك (المدينة - الحي - الشارع)">
+      <button id="getLocBtn" type="button">📍 حدد موقعي</button>
+    </div>
     <button id="confirm">تأكيد الطلب</button>
   </div>
 </div>
@@ -137,6 +145,7 @@ let loaded = false;
 let cart = {};
 let currentType = 'مطعم';
 let listening = false;
+let customerCoords = null; // لتخزين خط العرض وخط الطول للزبون
 const DELIVERY_FEE = 20000;
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
@@ -240,11 +249,37 @@ function closeCart() {
   document.getElementById('home').style.display = 'block';
 }
 
+// دالة تحديد الموقع الجغرافي للزبون
+function getMyLocation() {
+  if (!navigator.geolocation) {
+    alert('متصفحك لا يدعم تحديد الموقع الجغرافي');
+    return;
+  }
+  const btn = document.getElementById('getLocBtn');
+  btn.textContent = 'جاري التحديد...';
+  navigator.geolocation.getCurrentPosition(
+    function(position) {
+      customerCoords = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      document.getElementById('custAddr').value = 'الموقع الحالي (تم التقاط الإحداثيات)';
+      btn.textContent = '📍 تم التحديد';
+      setTimeout(function() { btn.textContent = '📍 حدد موقعي'; }, 3000);
+    },
+    function(error) {
+      alert('تعذر تحديد الموقع، تأكد من السماح بالوصول للموقع من إعدادات المتصفح.');
+      btn.textContent = '📍 حدد موقعي';
+    },
+    { enableHighAccuracy: true }
+  );
+}
+
 async function confirmOrder() {
   const name = document.getElementById('custName').value.trim();
   const addr = document.getElementById('custAddr').value.trim();
   if (totals().count === 0) { alert('السلة فارغة'); return; }
-  if (!name || !addr) { alert('اكتب اسمك وعنوانك'); return; }
+  if (!name || !addr) { alert('اكتب اسمك وعنوانك أو حدد موقعك'); return; }
 
   const items = cartItems().map(function(i) {
     return {n: i.n, shop: i.shop, q: cart[i.id], p: i.p};
@@ -254,6 +289,7 @@ async function confirmOrder() {
     const ref = await addDoc(collection(db, 'orders'), {
       customer: name,
       address: addr,
+      location: customerCoords || null, // حفظ الإحداثيات إن وجدت لتتبع السائق
       items: items,
       subtotal: totals().sum,
       deliveryFee: DELIVERY_FEE,
@@ -263,6 +299,7 @@ async function confirmOrder() {
     });
     alert('تم استلام طلبك! رقم الطلب: ' + ref.id.slice(0, 6));
     cart = {};
+    customerCoords = null;
     document.getElementById('custName').value = '';
     document.getElementById('custAddr').value = '';
     updateBar();
@@ -288,6 +325,7 @@ document.addEventListener('click', function(e) {
   if (t.classList.contains('chgBtn')) { change(t.dataset.id, Number(t.dataset.d)); return; }
   if (t.id === 'openCartBtn') { openCart(); return; }
   if (t.id === 'back') { closeCart(); return; }
+  if (t.id === 'getLocBtn') { getMyLocation(); return; }
   if (t.id === 'confirm') { confirmOrder(); return; }
 });
 
