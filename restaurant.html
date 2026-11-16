@@ -11,7 +11,6 @@
   header { background:linear-gradient(135deg, #e65100, #f57c00); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
   header span { flex: 1; text-align: center; }
 
-  /* زر تغيير الدور العلوي الدائم قبل وبعد تسجيل الدخول */
   .global-top-bar { padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
   #changeRoleGlobal { background: white; color: #555; border: 1px solid #ddd; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
   #changeRoleGlobal:hover { background: #f1f3f5; }
@@ -71,9 +70,17 @@
   .del { background:#c62828; }
   
   .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+  /* تصميم التنبيهات العائمة (Toast) */
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  #toast.success { background: #2e7d32; }
+  #toast.error { background: #c62828; }
 </style>
 </head>
 <body>
+
+<div id="toast"></div>
 
 <div class="global-top-bar">
   <button id="changeRoleGlobal">🔄 تغيير الدور</button>
@@ -131,6 +138,15 @@ let started = false;
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
 
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'show ' + type;
+  setTimeout(function() {
+    toast.className = '';
+  }, 3000);
+}
+
 function myShop() {
   return members.find(function(m) {
     return m.type === 'shop' && m.email && m.email.toLowerCase() === myEmail;
@@ -174,6 +190,7 @@ async function doLogin() {
   document.getElementById('loginErr').textContent = '';
   try {
     await signInWithEmailAndPassword(auth, email, pass);
+    showToast('مرحباً بك في لوحة المطعم');
   } catch (e) {
     document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
   }
@@ -273,12 +290,17 @@ function handleRoleChange() {
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'logout') { 
+    signOut(auth); 
+    showToast('تم تسجيل الخروج');
+    return; 
+  }
   if (t.id === 'changeRoleGlobal') { handleRoleChange(); return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); editId = null; render(); return; }
 
   if (t.classList.contains('act') && !t.disabled) {
     await updateDoc(doc(db, 'orders', t.dataset.id), { state: t.dataset.s });
+    showToast('تم تحديث حالة الطلب بنجاح');
     return;
   }
 
@@ -291,27 +313,32 @@ document.addEventListener('click', async function(e) {
     const n = document.getElementById('pName').value.trim();
     const p = Number(document.getElementById('pPrice').value);
     let type = document.getElementById('pType').value.trim();
-    if (!n || !p || p <= 0) { alert('اكتب اسم المنتج وسعراً صحيحاً'); return; }
+    if (!n || !p || p <= 0) { showToast('اكتب اسم المنتج وسعراً صحيحاً', 'error'); return; }
     if (type !== 'سوبر ماركت') type = 'مطعم';
     try {
       if (editId) {
         await updateDoc(doc(db, 'products', editId), { n: n, p: p, type: type });
         editId = null;
+        showToast('تم تعديل المنتج بنجاح');
       } else {
         await addDoc(collection(db, 'products'), {
           n: n, p: p, type: type, shop: shopRec.name, ownerEmail: myEmail
         });
+        showToast('تمت إضافة المنتج بنجاح');
       }
     } catch (err) {
-      alert('صار خطأ، جرب مرة ثانية');
+      showToast('حدث خطأ، حاول مرة أخرى', 'error');
       console.error(err);
     }
   }
   if (act === 'edit') { editId = t.dataset.id; render(); }
   if (act === 'cancel') { editId = null; render(); }
   if (act === 'del' && confirm('حذف هذا المنتج؟')) {
-    try { await deleteDoc(doc(db, 'products', t.dataset.id)); }
-    catch (err) { alert('صار خطأ، جرب مرة ثانية'); console.error(err); }
+    try { 
+      await deleteDoc(doc(db, 'products', t.dataset.id)); 
+      showToast('تم حذف المنتج');
+    }
+    catch (err) { showToast('حدث خطأ، حاول مرة أخرى', 'error'); console.error(err); }
   }
 });
 
