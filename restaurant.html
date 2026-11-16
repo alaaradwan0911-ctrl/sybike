@@ -7,43 +7,67 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#e65100">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
-  header { background:#e65100; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
-  #loginBox { padding:20px; }
-  #loginBox h2 { text-align:center; color:#e65100; }
-  #loginBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
-  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#e65100; color:white; font-size:17px; font-weight:bold; }
-  #loginErr { color:#c62828; text-align:center; margin-top:10px; }
-  #app { display:none; }
-  #logout { background:white; color:#e65100; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; margin:10px 12px 0 12px; }
-  .shopName { text-align:center; font-size:20px; font-weight:bold; padding:10px; color:#e65100; }
-  .sub { margin:0 12px 8px 12px; padding:12px; border-radius:10px; text-align:center; font-weight:bold; }
-  .sub.ok { background:#c8e6c9; color:#2e7d32; }
-  .sub.bad { background:#ffcdd2; color:#c62828; }
-  .tabs { display:flex; gap:8px; padding:0 12px 8px 12px; }
-  .tabs button { flex:1; padding:12px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
-  .tabs button.active { background:#e65100; color:white; }
-  .info { padding:0 12px 6px 12px; color:#555; text-align:center; }
-  .order { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
-  .order h3 { margin:0 0 8px 0; }
-  .item { padding:4px 0; font-size:17px; }
-  .addr { color:#666; margin:10px 0; padding-top:8px; border-top:1px solid #eee; }
-  .status { display:inline-block; padding:4px 12px; border-radius:20px; font-size:14px; margin-bottom:8px; }
-  .new { background:#ffe0b2; color:#e65100; }
-  .cooking { background:#fff9c4; color:#f57f17; }
-  .order button { width:100%; padding:12px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#e65100; }
-  .order button.done { background:#2e7d32; }
-  .order button:disabled { background:#bbb; }
-  .add { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
-  .add input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:8px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
-  .add button { width:100%; padding:12px; border:none; border-radius:8px; background:#e65100; color:white; font-size:16px; font-weight:bold; }
-  .prod { background:white; border-radius:12px; padding:14px; margin:10px 12px; }
-  .prod h3 { margin:0 0 4px 0; }
-  .prod .price { color:#e65100; font-weight:bold; }
-  .btn { padding:10px 14px; border:none; border-radius:8px; color:white; font-size:15px; margin-top:8px; margin-left:6px; }
+  body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
+  header { background:linear-gradient(135deg, #e65100, #f57c00); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  
+  #loginBox { max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  #loginBox h2 { text-align:center; color:#e65100; margin-top:0; margin-bottom: 20px; font-size: 20px; }
+  #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
+  #loginBox input:focus { border-color: #e65100; outline: none; background: #fff; }
+  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#e65100; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(230,81,0,0.3); transition: background 0.2s; }
+  #loginBox button:active { background: #d84315; }
+  #loginErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
+  
+  #app { display:none; max-width: 600px; margin: 0 auto; }
+  .top-bar { display: flex; justify-content: space-between; padding: 12px 16px 0 16px; }
+  #logout { background:white; color:#e65100; border:1px solid #e65100; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
+  #logout:hover { background: #fff3e0; }
+  #changeRole { background:white; color:#555; border:1px solid #ddd; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
+  #changeRole:hover { background: #f1f3f5; }
+
+  .shopName { text-align:center; font-size:22px; font-weight:bold; padding:15px 10px 5px 10px; color:#222; }
+  
+  .sub { margin:10px 16px; padding:14px; border-radius:12px; text-align:center; font-weight:bold; font-size: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+  .sub.ok { background:#e8f5e9; color:#2e7d32; border: 1px solid #c8e6c9; }
+  .sub.bad { background:#ffebee; color:#c62828; border: 1px solid #ffcdd2; }
+  
+  .tabs { display:flex; gap:10px; padding:12px 16px; }
+  .tabs button { flex:1; padding:14px; border:none; border-radius:12px; background:white; font-size:16px; font-weight:bold; color: #666; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s; }
+  .tabs button.active { background:#e65100; color:white; box-shadow: 0 4px 12px rgba(230,81,0,0.3); }
+  
+  .info { padding:4px 16px; color:#666; font-size: 14px; font-weight: 500; }
+  
+  .order { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
+  .order h3 { margin:0 0 10px 0; font-size: 18px; color: #222; }
+  .item { padding:6px 0; font-size:16px; color: #444; border-bottom: 1px dashed #f0f0f0; }
+  .item:last-child { border-bottom: none; }
+  .addr { color:#555; margin:12px 0; padding-top:10px; border-top:1px solid #eee; font-size: 15px; }
+  
+  .status { display:inline-block; padding:5px 14px; border-radius:20px; font-size:13px; font-weight: bold; margin-bottom:10px; }
+  .new { background:#fff3e0; color:#e65100; }
+  .cooking { background:#fffde7; color:#f57f17; }
+  
+  .order button { width:100%; padding:14px; border:none; border-radius:10px; font-size:16px; font-weight:bold; color:white; background:#e65100; cursor: pointer; box-shadow: 0 4px 10px rgba(230,81,0,0.2); transition: background 0.2s; margin-top: 5px; }
+  .order button.done { background:#2e7d32; box-shadow: 0 4px 10px rgba(46,125,50,0.2); }
+  .order button:disabled { background:#e0e0e0; color: #999; box-shadow: none; cursor: not-allowed; }
+  
+  .add { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .add b { font-size: 17px; color: #333; }
+  .add input { width:100%; box-sizing:border-box; padding:12px; margin-top: 10px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; font-size:15px; background: #fafafa; }
+  .add input:focus { border-color: #e65100; outline: none; background: #fff; }
+  .add button { width:100%; padding:12px; border:none; border-radius:10px; background:#e65100; color:white; font-size:16px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(230,81,0,0.2); }
+  
+  .prod { background:white; border-radius:14px; padding:18px; margin:12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
+  .prod h3 { margin:0 0 6px 0; font-size: 18px; color: #222; }
+  .prod .price { color:#e65100; font-weight:bold; font-size: 16px; margin-bottom: 6px; }
+  .prod style-type { color: #666; font-size: 14px; }
+  
+  .btn { padding:10px 16px; border:none; border-radius:8px; color:white; font-size:14px; font-weight: bold; margin-top:10px; margin-left:8px; cursor: pointer; transition: opacity 0.2s; }
+  .btn:hover { opacity: 0.9; }
   .edit { background:#1565c0; }
   .del { background:#c62828; }
-  .empty { text-align:center; color:#888; padding:30px; }
+  
+  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin: 12px 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
 </style>
 </head>
 <body>
@@ -58,8 +82,10 @@
 </div>
 
 <div id="app">
+  <div class="top-bar">
     <button id="logout">خروج</button>
-  <button id="changeRole" style="background:white;color:#e65100;border:none;padding:8px 14px;border-radius:8px;font-weight:bold;margin:10px 0 0 12px;">تغيير الدور</button>
+    <button id="changeRole">تغيير الدور</button>
+  </div>
   <div class="shopName" id="shopName"></div>
   <div id="subBar"></div>
   <div class="tabs">
@@ -211,7 +237,7 @@ function renderProducts(shop) {
   const mine = products.filter(function(p) { return p.ownerEmail === myEmail; });
   const editing = editId ? mine.find(function(p) { return p.id === editId; }) : null;
 
-  let html = '<div class="add"><b>' + (editing ? 'تعديل المنتج' : 'إضافة منتج جديد') + '</b><br><br>' +
+  let html = '<div class="add"><b>' + (editing ? 'تعديل المنتج' : 'إضافة منتج جديد') + '</b><br>' +
     '<input id="pName" placeholder="اسم المنتج" value="' + (editing ? editing.n.replace(/"/g, '&quot;') : '') + '">' +
     '<input id="pPrice" type="number" inputmode="numeric" placeholder="السعر بالليرة" value="' + (editing ? editing.p : '') + '">' +
     '<input id="pType" placeholder="النوع: مطعم أو سوبر ماركت" value="' + (editing ? editing.type : 'مطعم') + '">' +
@@ -224,7 +250,7 @@ function renderProducts(shop) {
   } else {
     html += mine.map(function(p) {
       return '<div class="prod"><h3>' + p.n + '</h3><div class="price">' + fmt(p.p) + '</div>' +
-        '<div style="color:#666">' + p.type + '</div>' +
+        '<div style="color:#666; font-size: 14px;">' + p.type + '</div>' +
         '<button class="btn edit" data-act="edit" data-id="' + p.id + '">تعديل</button>' +
         '<button class="btn del" data-act="del" data-id="' + p.id + '">حذف</button></div>';
     }).join('');
@@ -235,7 +261,7 @@ function renderProducts(shop) {
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
-    if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'logout') { signOut(auth); return; }
   if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); editId = null; render(); return; }
 
