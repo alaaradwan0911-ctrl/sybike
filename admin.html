@@ -8,9 +8,15 @@
 <meta name="theme-color" content="#4a148c">
 <style>
   body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
-  header { background:linear-gradient(135deg, #4a148c, #6a1b9a); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+  header { background:linear-gradient(135deg, #4a148c, #6a1b9a); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
+  header span { flex: 1; text-align: center; }
   
-  #loginBox { max-width: 400px; margin: 40px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  /* زر تغيير الدور العلوي الدائم قبل وبعد تسجيل الدخول */
+  .global-top-bar { padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
+  #changeRoleGlobal { background: white; color: #555; border: 1px solid #ddd; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
+  #changeRoleGlobal:hover { background: #f1f3f5; }
+
+  #loginBox { max-width: 400px; margin: 30px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
   #loginBox h2 { text-align:center; color:#4a148c; margin-top:0; margin-bottom: 20px; font-size: 20px; }
   #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
   #loginBox input:focus { border-color: #4a148c; outline: none; background: #fff; }
@@ -23,8 +29,6 @@
   .topBtns { display:flex; justify-content: space-between; padding: 12px 16px 0 16px; }
   #logout { background:white; color:#4a148c; border:1px solid #4a148c; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
   #logout:hover { background: #f3e5f5; }
-  #changeRole { background:white; color:#555; border:1px solid #ddd; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
-  #changeRole:hover { background: #f1f3f5; }
 
   .stats { display:flex; flex-wrap:wrap; gap:10px; padding:12px 16px; }
   .stat { flex:1 1 45%; background:white; border-radius:14px; padding:14px; text-align:center; font-size:14px; color: #666; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); }
@@ -65,7 +69,12 @@
 </style>
 </head>
 <body>
-<header>⚙️ Syria Bike Command Center</header>
+
+<div class="global-top-bar">
+  <button id="changeRoleGlobal">🔄 تغيير الدور</button>
+</div>
+
+<header><span>⚙️ Syria Bike Command Center</span></header>
 
 <div id="loginBox">
   <h2>تسجيل دخول المدير</h2>
@@ -78,7 +87,6 @@
 <div id="app">
   <div class="topBtns">
     <button id="logout">خروج</button>
-    <button id="changeRole">تغيير الدور</button>
   </div>
   <div class="stats">
     <div class="stat">كل الطلبات<b id="sOrders">0</b></div>
@@ -232,11 +240,16 @@ function render() {
   box.innerHTML = list || '<div class="empty">لا يوجد محلات أو سائقين بعد</div>';
 }
 
+function handleRoleChange() {
+  localStorage.removeItem('sb_role');
+  location.href = 'index.html?choose=1';
+}
+
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
   if (t.id === 'logout') { signOut(auth); return; }
-  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
+  if (t.id === 'changeRoleGlobal') { handleRoleChange(); return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); render(); return; }
   const act = t.dataset.act;
   if (!act) return;
