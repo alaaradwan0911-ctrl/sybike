@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Syria Bike Command Center</title>
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest_admin.json">
 <meta name="theme-color" content="#4a148c">
 <style>
   body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
@@ -66,9 +66,17 @@
   .del { background:#c62828; }
   
   .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+  /* تصميم التنبيهات العائمة (Toast) */
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  #toast.success { background: #2e7d32; }
+  #toast.error { background: #c62828; }
 </style>
 </head>
 <body>
+
+<div id="toast"></div>
 
 <div class="global-top-bar">
   <button id="changeRoleGlobal">🔄 تغيير الدور</button>
@@ -145,6 +153,15 @@ function fmt(x) { return Math.round(x).toLocaleString('ar-SY') + ' ل.س'; }
 function isActive(m) { return m.paidUntil && m.paidUntil > Date.now(); }
 function dateText(ms) { return new Date(ms).toLocaleDateString('ar-SY'); }
 
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'show ' + type;
+  setTimeout(function() {
+    toast.className = '';
+  }, 3000);
+}
+
 function startListening() {
   if (started) return;
   started = true;
@@ -181,6 +198,7 @@ async function doLogin() {
   document.getElementById('loginErr').textContent = '';
   try {
     await signInWithEmailAndPassword(auth, email, pass);
+    showToast('أهلاً بك يا مدير النظام');
   } catch (e) {
     document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
   }
@@ -248,7 +266,11 @@ function handleRoleChange() {
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'logout') { 
+    signOut(auth); 
+    showToast('تم تسجيل الخروج');
+    return; 
+  }
   if (t.id === 'changeRoleGlobal') { handleRoleChange(); return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); render(); return; }
   const act = t.dataset.act;
@@ -258,26 +280,33 @@ document.addEventListener('click', async function(e) {
     const name = document.getElementById('nm').value.trim();
     const email = document.getElementById('em').value.trim().toLowerCase();
     const type = document.getElementById('tp').value;
-    if (!name) { alert('اكتب الاسم'); return; }
+    if (!name) { showToast('اكتب الاسم', 'error'); return; }
     await addDoc(collection(db, 'members'), { name: name, email: email, type: type, paidUntil: 0, createdAt: Date.now() });
     document.getElementById('nm').value = '';
     document.getElementById('em').value = '';
+    showToast('تمت إضافة العضو بنجاح');
   }
   if (act === 'pay') {
     const m = members.find(function(x) { return x.id === t.dataset.id; });
     const base = isActive(m) ? m.paidUntil : Date.now();
     await updateDoc(doc(db, 'members', m.id), { paidUntil: base + 30 * DAY });
+    showToast('تم تفعيل الاشتراك لشهر بنجاح');
   }
   if (act === 'editMail') {
     const m = members.find(function(x) { return x.id === t.dataset.id; });
     const v = prompt('اكتب الإيميل الجديد', m.email || '');
-    if (v !== null) { await updateDoc(doc(db, 'members', m.id), { email: v.trim().toLowerCase() }); }
+    if (v !== null) { 
+      await updateDoc(doc(db, 'members', m.id), { email: v.trim().toLowerCase() }); 
+      showToast('تم تحديث الإيميل');
+    }
   }
   if (act === 'delMember' && confirm('حذف نهائي؟')) {
     await deleteDoc(doc(db, 'members', t.dataset.id));
+    showToast('تم حذف العضو');
   }
   if (act === 'delOrder' && confirm('هل تريد حذف هذا الطلب؟')) {
     await deleteDoc(doc(db, 'orders', t.dataset.id));
+    showToast('تم حذف الطلب');
   }
 });
 
