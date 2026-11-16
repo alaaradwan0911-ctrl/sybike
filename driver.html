@@ -101,6 +101,7 @@ let allOrders = [];
 let members = [];
 let myEmail = '';
 let started = false;
+let watchId = null; // لمتابعة إحداثيات GPS للسائق
 
 function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
 function esc(s) {
@@ -139,6 +140,7 @@ onAuthStateChanged(auth, function(user) {
     myEmail = '';
     document.getElementById('loginBox').style.display = 'block';
     document.getElementById('app').style.display = 'none';
+    stopTracking();
   }
 });
 
@@ -150,6 +152,51 @@ async function doLogin() {
     await signInWithEmailAndPassword(auth, email, pass);
   } catch (e) {
     document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
+  }
+}
+
+// تتبع موقع السائق وإرساله لفايربيس باستمرار عند وجود طلب في الطريق
+function startTracking(orderId) {
+  if (watchId !== null) return;
+  if (!navigator.geolocation) return;
+
+  watchId = navigator.geolocation.watchPosition(
+    async function(pos) {
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      try {
+        await updateDoc(doc(db, 'orders', orderId), { driverLocation: coords });
+      } catch (err) {
+        console.error("خطأ في تحديث موقع السائق:", err);
+      }
+    },
+    function(err) {
+      console.error("خطأ في تحديد موقع GPS:", err);
+    },
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+  );
+}
+
+function stopTracking() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+}
+
+async function updateState(id, newState, currentDriverName) {
+  try {
+    const updateData = { state: newState };
+    if (newState === 'onway') {
+      updateData.driver = currentDriverName;
+      updateData.driverEmail = myEmail;
+      startTracking(id); // بدء بث موقع السائق الحي
+    } else if (newState === 'delivered') {
+      stopTracking(); // إيقاف البث عند تسليم الطلب
+    }
+    await updateDoc(doc(db, 'orders', id), updateData);
+  } catch (e) {
+    alert('حدث خطأ أثناء تحديث حالة الطلب');
+    console.error(e);
   }
 }
 
@@ -172,20 +219,4 @@ function render() {
   document.getElementById('who').textContent = '🚲 ' + me;
 
   if (ok) {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(drv.paidUntil).toLocaleDateString('ar-SY') + '</div>';
-  } else if (drv.paidUntil) {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (5 دولار بالشهر)</div>';
-  } else {
-    document.getElementById('subBar').innerHTML =
-      '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (5 دولار بالشهر)</div>';
-  }
-
-  function isMine(o) { return o.driverEmail === myEmail || (!o.driverEmail && o.driver === me); }
-
-  const mineDone = allOrders.filter(function(o) { return o.state === 'delivered' && isMine(o); });
-  document.getElementById('count').textContent = mineDone.length;
-  document.getElementById('earn').textContent = fmt(mineDone.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
-
-  const list =
+    document.getElementById('
