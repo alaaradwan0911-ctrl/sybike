@@ -4,85 +4,51 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Syria Bike Command Center</title>
-<link rel="manifest" href="manifest_admin.json">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.png">
 <meta name="theme-color" content="#4a148c">
 <style>
-  body { margin:0; font-family:Arial,sans-serif; background:#f8f9fa; padding-bottom:30px; color:#333; }
-  header { background:linear-gradient(135deg, #4a148c, #6a1b9a); color:white; padding:18px; text-align:center; font-size:22px; font-weight:bold; box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
-  header span { flex: 1; text-align: center; }
-  
-  /* زر تغيير الدور العلوي الدائم قبل وبعد تسجيل الدخول */
-  .global-top-bar { padding: 10px 16px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: flex-end; }
-  #changeRoleGlobal { background: white; color: #555; border: 1px solid #ddd; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px; }
-  #changeRoleGlobal:hover { background: #f1f3f5; }
-
-  #loginBox { max-width: 400px; margin: 30px auto; background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-  #loginBox h2 { text-align:center; color:#4a148c; margin-top:0; margin-bottom: 20px; font-size: 20px; }
-  #loginBox input { width:100%; box-sizing:border-box; padding:14px; margin-bottom:14px; border:1px solid #ddd; border-radius:10px; font-size:16px; background: #fafafa; transition: border-color 0.2s; }
-  #loginBox input:focus { border-color: #4a148c; outline: none; background: #fff; }
-  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#4a148c; color:white; font-size:17px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(74,20,140,0.3); transition: background 0.2s; }
-  #loginBox button:active { background: #38006b; }
-  #loginErr { color:#c62828; text-align:center; margin-top:10px; font-size: 14px; }
-  
-  #app { display:none; max-width: 650px; margin: 0 auto; }
-  
-  .topBtns { display:flex; justify-content: space-between; padding: 12px 16px 0 16px; }
-  #logout { background:white; color:#4a148c; border:1px solid #4a148c; padding:8px 14px; border-radius:8px; font-weight:bold; cursor: pointer; transition: all 0.2s; }
-  #logout:hover { background: #f3e5f5; }
-
-  .stats { display:flex; flex-wrap:wrap; gap:10px; padding:12px 16px; }
-  .stat { flex:1 1 45%; background:white; border-radius:14px; padding:14px; text-align:center; font-size:14px; color: #666; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.03); }
-  .stat b { display:block; font-size:18px; color:#4a148c; margin-top:6px; }
-  
-  .tabs { display:flex; gap:10px; padding:4px 16px 12px 16px; }
-  .tabs button { flex:1; padding:14px; border:none; border-radius:12px; background:white; font-size:16px; font-weight:bold; color: #666; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s; }
-  .tabs button.active { background:#4a148c; color:white; box-shadow: 0 4px 12px rgba(74,20,140,0.3); }
-
-  .box { padding: 0 16px; }
-  
-  .card { background:white; border-radius:14px; padding:18px; margin-bottom:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.04); }
-  .card h3 { margin:0 0 8px 0; font-size: 18px; color: #222; }
-  .line { padding:5px 0; color:#444; font-size: 15px; border-bottom: 1px dashed #f0f0f0; }
-  .line:last-of-type { border-bottom: none; }
-  
-  .badge { display:inline-block; padding:5px 14px; border-radius:20px; font-size:13px; font-weight: bold; margin-bottom:10px; }
-  .new { background:#fff3e0; color:#e65100; }
-  .cooking { background:#fffde7; color:#f57f17; }
-  .ready { background:#e3f2fd; color:#1565c0; }
-  .onway { background:#f3e5f5; color:#6a1b9a; }
-  .delivered { background:#e8f5e9; color:#2e7d32; }
-  .active-sub { background:#e8f5e9; color:#2e7d32; }
-  .expired-sub { background:#ffebee; color:#c62828; }
-  
-  .add { background:white; border-radius:14px; padding:18px; margin-bottom:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-  .add input, .add select { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ddd; border-radius:10px; font-size:15px; background: #fafafa; }
-  .add input:focus, .add select:focus { border-color: #4a148c; outline: none; background: #fff; }
-  .add button { width:100%; padding:14px; border:none; border-radius:10px; background:#4a148c; color:white; font-size:16px; font-weight:bold; cursor: pointer; box-shadow: 0 4px 10px rgba(74,20,140,0.2); }
-  
-  .btn { padding:10px 16px; border:none; border-radius:8px; color:white; font-size:14px; font-weight: bold; margin-top:12px; margin-left:8px; cursor: pointer; transition: opacity 0.2s; }
-  .btn:hover { opacity: 0.9; }
+  body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
+  header { background:#4a148c; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
+  #loginBox { padding:20px; }
+  #loginBox h2 { text-align:center; color:#4a148c; }
+  #loginBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  #loginBox button { width:100%; padding:14px; border:none; border-radius:10px; background:#4a148c; color:white; font-size:17px; font-weight:bold; }
+  #loginErr { color:#c62828; text-align:center; margin-top:10px; }
+  #app { display:none; }
+  .topBtns { display:flex; gap:8px; margin:10px 12px 0 12px; }
+  .topBtns button { background:white; color:#4a148c; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; }
+  .warn { background:#fff3e0; color:#e65100; padding:10px; border-radius:8px; margin:8px 12px; font-size:14px; }
+  .hint { color:#666; font-size:13px; margin-bottom:8px; }
+  .stats { display:flex; flex-wrap:wrap; gap:8px; padding:12px; }
+  .stat { flex:1 1 40%; background:white; border-radius:12px; padding:10px; text-align:center; font-size:14px; }
+  .stat b { display:block; font-size:18px; color:#4a148c; margin-top:4px; }
+  .tabs { display:flex; gap:8px; padding:0 12px; }
+  .tabs button { flex:1; padding:12px; border:none; border-radius:10px; background:white; font-size:16px; font-weight:bold; }
+  .tabs button.active { background:#4a148c; color:white; }
+  .box { padding:12px; }
+  .card { background:white; border-radius:12px; padding:14px; margin-bottom:10px; }
+  .card h3 { margin:0 0 6px 0; }
+  .line { padding:3px 0; color:#444; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:13px; margin-bottom:6px; }
+  .new { background:#ffe0b2; color:#e65100; }
+  .cooking { background:#fff9c4; color:#f57f17; }
+  .ready { background:#bbdefb; color:#1565c0; }
+  .onway { background:#e1bee7; color:#6a1b9a; }
+  .delivered { background:#c8e6c9; color:#2e7d32; }
+  .active-sub { background:#c8e6c9; color:#2e7d32; }
+  .expired-sub { background:#ffcdd2; color:#c62828; }
+  .add { background:white; border-radius:12px; padding:14px; margin-bottom:12px; }
+  .add input, .add select { width:100%; box-sizing:border-box; padding:12px; margin-bottom:8px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
+  .add button { width:100%; padding:12px; border:none; border-radius:8px; background:#4a148c; color:white; font-size:16px; font-weight:bold; }
+  .btn { padding:10px 14px; border:none; border-radius:8px; color:white; font-size:15px; margin-top:6px; margin-left:6px; }
   .pay { background:#2e7d32; }
-  .mail { background:#1565c0; }
   .del { background:#c62828; }
-  
-  .empty { text-align:center; color:#888; padding:40px 20px; font-size: 16px; background: white; border-radius: 14px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-
-  /* تصميم التنبيهات العائمة (Toast) */
-  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 9999; pointer-events: none; }
-  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-  #toast.success { background: #2e7d32; }
-  #toast.error { background: #c62828; }
+  .empty { text-align:center; color:#888; padding:30px; }
 </style>
 </head>
 <body>
-
-<div id="toast"></div>
-
-<div class="global-top-bar">
-  <button id="changeRoleGlobal">🔄 تغيير الدور</button>
-</div>
-
-<header><span>⚙️ Syria Bike Command Center</span></header>
+<header>⚙️ Syria Bike Command Center</header>
 
 <div id="loginBox">
   <h2>تسجيل دخول المدير</h2>
@@ -95,13 +61,15 @@
 <div id="app">
   <div class="topBtns">
     <button id="logout">خروج</button>
+    <button id="changeRole">تغيير الدور</button>
   </div>
+  <div id="banner"></div>
   <div class="stats">
     <div class="stat">كل الطلبات<b id="sOrders">0</b></div>
     <div class="stat">قيد التنفيذ<b id="sActive">0</b></div>
     <div class="stat">المبيعات المسلّمة<b id="sSales">0</b></div>
     <div class="stat">اشتراكات مفعّلة<b id="sSubs">0</b></div>
-    <div class="stat" style="flex: 1 1 100%;">دخلكم من الاشتراكات المفعّلة<b id="sIncome">0</b></div>
+    <div class="stat">دخلكم من الاشتراكات المفعّلة<b id="sIncome">0</b></div>
   </div>
   <div class="tabs">
     <button id="t1" class="active" data-tab="1">الطلبات</button>
@@ -110,9 +78,10 @@
   <div class="box">
     <div id="addBox" style="display:none">
       <div class="add">
-        <input id="nm" placeholder="الاسم (مطابق لما بدك الزبون يشوفه للمحلات)">
+        <input id="nm" placeholder="الاسم (متل ما بدك الزبون يشوفه)">
         <input id="em" type="email" placeholder="إيميل دخوله">
         <select id="tp"><option value="shop">محل / مطعم (10 دولار)</option><option value="driver">سائق (5 دولار)</option></select>
+        <div class="hint">أنشئ حساب هالإيميل من فايربيس (Authentication) قبل ما تضيفه هون.</div>
         <button data-act="addMember">إضافة</button>
       </div>
     </div>
@@ -123,7 +92,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, doc, deleteDoc, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, doc, deleteDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -147,25 +116,27 @@ const labels = {new:'طلب جديد', cooking:'قيد التحضير', ready:'�
 let allOrders = [];
 let members = [];
 let current = 1;
-let started = false;
+let unsubs = [];
 
+function $(id) { return document.getElementById(id); }
 function fmt(x) { return Math.round(x).toLocaleString('ar-SY') + ' ل.س'; }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
 function isActive(m) { return m.paidUntil && m.paidUntil > Date.now(); }
 function dateText(ms) { return new Date(ms).toLocaleDateString('ar-SY'); }
 
-function showToast(message, type = 'success') {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.className = 'show ' + type;
-  setTimeout(function() {
-    toast.className = '';
-  }, 3000);
+function onErr(err) {
+  console.error(err);
+  $('banner').innerHTML = '<div class="warn">⚠️ ما عندك صلاحية. سجّل دخول بإيميل المدير فقط.</div>';
 }
 
 function startListening() {
-  if (started) return;
-  started = true;
-  onSnapshot(collection(db, 'orders'), function(snap) {
+  if (unsubs.length) return;
+  $('banner').innerHTML = '';
+  unsubs.push(onSnapshot(collection(db, 'orders'), function(snap) {
     allOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
     allOrders.sort(function(a, b) {
       const ta = a.createdAt ? a.createdAt.seconds : 0;
@@ -173,69 +144,76 @@ function startListening() {
       return tb - ta;
     });
     render();
-  });
-  onSnapshot(collection(db, 'members'), function(snap) {
+  }, onErr));
+  unsubs.push(onSnapshot(collection(db, 'members'), function(snap) {
     members = snap.docs.map(function(d) { const m = d.data(); m.id = d.id; return m; });
     members.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
     render();
-  });
+  }, onErr));
+}
+
+function stopListening() {
+  unsubs.forEach(function(f) { f(); });
+  unsubs = [];
+  allOrders = [];
+  members = [];
 }
 
 onAuthStateChanged(auth, function(user) {
   if (user) {
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+    $('loginBox').style.display = 'none';
+    $('app').style.display = 'block';
     startListening();
   } else {
-    document.getElementById('loginBox').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
+    stopListening();
+    $('loginBox').style.display = 'block';
+    $('app').style.display = 'none';
   }
 });
 
 async function doLogin() {
-  const email = document.getElementById('email').value.trim();
-  const pass = document.getElementById('pass').value;
-  document.getElementById('loginErr').textContent = '';
+  const email = $('email').value.trim();
+  const pass = $('pass').value;
+  $('loginErr').textContent = '';
   try {
     await signInWithEmailAndPassword(auth, email, pass);
-    showToast('أهلاً بك يا مدير النظام');
   } catch (e) {
-    document.getElementById('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
+    $('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
   }
 }
 
 function stats() {
   const delivered = allOrders.filter(function(o) { return o.state === 'delivered'; });
-  const sales = delivered.reduce(function(s, o) { return s + (o.subtotal || o.total); }, 0);
+  const sales = delivered.reduce(function(s, o) { return s + (o.subtotal || o.total || 0); }, 0);
   const activeSubs = members.filter(isActive);
   const income = activeSubs.reduce(function(s, m) {
     return s + (m.type === 'driver' ? DRIVER_FEE_USD : SHOP_FEE_USD);
   }, 0);
-  document.getElementById('sOrders').textContent = allOrders.length;
-  document.getElementById('sActive').textContent = allOrders.filter(function(o) { return o.state !== 'delivered'; }).length;
-  document.getElementById('sSales').textContent = fmt(sales);
-  document.getElementById('sSubs').textContent = activeSubs.length + ' من ' + members.length;
-  document.getElementById('sIncome').textContent = '$' + income + ' (' + fmt(income * USD_RATE) + ')';
+  $('sOrders').textContent = allOrders.length;
+  $('sActive').textContent = allOrders.filter(function(o) { return o.state !== 'delivered'; }).length;
+  $('sSales').textContent = fmt(sales);
+  $('sSubs').textContent = activeSubs.length + ' من ' + members.length;
+  $('sIncome').textContent = '$' + income + ' (' + fmt(income * USD_RATE) + ')';
 }
 
 function render() {
   stats();
-  document.getElementById('t1').className = current === 1 ? 'active' : '';
-  document.getElementById('t2').className = current === 2 ? 'active' : '';
-  document.getElementById('addBox').style.display = current === 2 ? 'block' : 'none';
-  const box = document.getElementById('listBox');
+  $('t1').className = current === 1 ? 'active' : '';
+  $('t2').className = current === 2 ? 'active' : '';
+  $('addBox').style.display = current === 2 ? 'block' : 'none';
+  const box = $('listBox');
 
   if (current === 1) {
     if (allOrders.length === 0) { box.innerHTML = '<div class="empty">لا يوجد طلبات بعد</div>'; return; }
     box.innerHTML = allOrders.map(function(o) {
-      const items = o.items.map(function(i) { return i.n + ' × ' + i.q; }).join('، ');
-      const driver = o.driver ? '<div class="line">🚲 السائق: ' + o.driver + '</div>' : '';
-      return '<div class="card"><span class="badge ' + o.state + '">' + labels[o.state] + '</span>' +
-        '<h3>طلب رقم ' + o.id.slice(0, 6) + '</h3>' +
-        '<div class="line">👤 ' + o.customer + ' · 📍 ' + o.address + '</div>' +
+      const items = (o.items || []).map(function(i) { return esc(i.n) + ' × ' + esc(i.q); }).join('، ');
+      const driver = o.driver ? '<div class="line">🚲 السائق: ' + esc(o.driver) + '</div>' : '';
+      return '<div class="card"><span class="badge ' + esc(o.state) + '">' + esc(labels[o.state] || o.state) + '</span>' +
+        '<h3>طلب رقم ' + esc(o.id.slice(0, 6)) + '</h3>' +
+        '<div class="line">👤 ' + esc(o.customer) + ' · 📍 ' + esc(o.address) + '</div>' +
         '<div class="line">🍽️ ' + items + '</div>' +
-        '<div class="line">💵 ' + fmt(o.total) + '</div>' + driver +
-        '<button class="btn del" data-act="delOrder" data-id="' + o.id + '">حذف</button></div>';
+        '<div class="line">💵 ' + fmt(o.total || 0) + '</div>' + driver +
+        '<button class="btn del" data-act="delOrder" data-id="' + esc(o.id) + '">حذف</button></div>';
     }).join('');
     return;
   }
@@ -246,72 +224,61 @@ function render() {
       ? '<span class="badge active-sub">مفعّل حتى ' + dateText(m.paidUntil) + '</span>'
       : '<span class="badge expired-sub">' + (m.paidUntil ? 'منتهي منذ ' + dateText(m.paidUntil) : 'غير مفعّل') + '</span>';
     const fee = m.type === 'driver' ? DRIVER_FEE_USD : SHOP_FEE_USD;
+    const stale = m.id !== String(m.email || '').toLowerCase();
     return '<div class="card">' + status +
-      '<h3>' + m.name + '</h3>' +
+      '<h3>' + esc(m.name) + '</h3>' +
       '<div class="line">' + (m.type === 'driver' ? '🚲 سائق' : '🍽️ محل') + ' · الاشتراك $' + fee + ' بالشهر</div>' +
-      '<div class="line">✉️ ' + (m.email || 'بدون إيميل') + '</div>' +
-      '<button class="btn pay" data-act="pay" data-id="' + m.id + '">تفعيل شهر (استلمت المبلغ)</button>' +
-      '<button class="btn mail" data-act="editMail" data-id="' + m.id + '">تعديل الإيميل</button>' +
-      '<button class="btn del" data-act="delMember" data-id="' + m.id + '">حذف</button></div>';
+      '<div class="line">✉️ ' + esc(m.email || 'بدون إيميل') + '</div>' +
+      (stale ? '<div class="warn" style="margin:6px 0">⚠️ سجل قديم: احذفه وأضفه من جديد.</div>' : '') +
+      '<button class="btn pay" data-act="pay" data-id="' + esc(m.id) + '">تفعيل شهر (استلمت المبلغ)</button>' +
+      '<button class="btn del" data-act="delMember" data-id="' + esc(m.id) + '">حذف</button></div>';
   }).join('');
 
   box.innerHTML = list || '<div class="empty">لا يوجد محلات أو سائقين بعد</div>';
 }
 
-function handleRoleChange() {
-  localStorage.removeItem('sb_role');
-  location.href = 'index.html?choose=1';
-}
-
 document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
-  if (t.id === 'logout') { 
-    signOut(auth); 
-    showToast('تم تسجيل الخروج');
-    return; 
-  }
-  if (t.id === 'changeRoleGlobal') { handleRoleChange(); return; }
+  if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); render(); return; }
   const act = t.dataset.act;
   if (!act) return;
 
-  if (act === 'addMember') {
-    const name = document.getElementById('nm').value.trim();
-    const email = document.getElementById('em').value.trim().toLowerCase();
-    const type = document.getElementById('tp').value;
-    if (!name) { showToast('اكتب الاسم', 'error'); return; }
-    await addDoc(collection(db, 'members'), { name: name, email: email, type: type, paidUntil: 0, createdAt: Date.now() });
-    document.getElementById('nm').value = '';
-    document.getElementById('em').value = '';
-    showToast('تمت إضافة العضو بنجاح');
-  }
-  if (act === 'pay') {
-    const m = members.find(function(x) { return x.id === t.dataset.id; });
-    const base = isActive(m) ? m.paidUntil : Date.now();
-    await updateDoc(doc(db, 'members', m.id), { paidUntil: base + 30 * DAY });
-    showToast('تم تفعيل الاشتراك لشهر بنجاح');
-  }
-  if (act === 'editMail') {
-    const m = members.find(function(x) { return x.id === t.dataset.id; });
-    const v = prompt('اكتب الإيميل الجديد', m.email || '');
-    if (v !== null) { 
-      await updateDoc(doc(db, 'members', m.id), { email: v.trim().toLowerCase() }); 
-      showToast('تم تحديث الإيميل');
+  try {
+    if (act === 'addMember') {
+      const name = $('nm').value.trim();
+      const email = $('em').value.trim().toLowerCase();
+      const type = $('tp').value;
+      if (!name) { alert('اكتب الاسم'); return; }
+      if (email.indexOf('@') < 1) { alert('اكتب إيميل صحيح'); return; }
+      if (members.some(function(x) { return x.id === email; })) { alert('هذا الإيميل مضاف من قبل'); return; }
+      if (type === 'shop' && members.some(function(x) { return x.type === 'shop' && x.name === name; })) { alert('في محل بنفس هالاسم'); return; }
+      await setDoc(doc(db, 'members', email), { name: name, email: email, type: type, paidUntil: 0, createdAt: Date.now() });
+      $('nm').value = '';
+      $('em').value = '';
     }
-  }
-  if (act === 'delMember' && confirm('حذف نهائي؟')) {
-    await deleteDoc(doc(db, 'members', t.dataset.id));
-    showToast('تم حذف العضو');
-  }
-  if (act === 'delOrder' && confirm('هل تريد حذف هذا الطلب؟')) {
-    await deleteDoc(doc(db, 'orders', t.dataset.id));
-    showToast('تم حذف الطلب');
+    if (act === 'pay') {
+      const m = members.find(function(x) { return x.id === t.dataset.id; });
+      if (!m) return;
+      const base = isActive(m) ? m.paidUntil : Date.now();
+      await updateDoc(doc(db, 'members', m.id), { paidUntil: base + 30 * DAY });
+    }
+    if (act === 'delMember' && confirm('حذف نهائي؟')) {
+      await deleteDoc(doc(db, 'members', t.dataset.id));
+    }
+    if (act === 'delOrder' && confirm('هل تريد حذف هذا الطلب؟')) {
+      await deleteDoc(doc(db, 'orders', t.dataset.id));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('صار خطأ: تأكد إنك داخل بإيميل المدير');
   }
 });
 
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.getElementById('loginBox').style.display !== 'none') { doLogin(); }
+  if (e.key === 'Enter' && $('loginBox').style.display !== 'none') { doLogin(); }
 });
 </script>
 </body>
