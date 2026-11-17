@@ -1,11 +1,13 @@
 {
+  "id": "./index.html",
   "name": "سيريا بايك",
   "short_name": "سيريا بايك",
+  "description": "Sybike - Deli & Ride",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0b3a9c",
+  "background_color": "#16C2D5",
+  "theme_color": "#622485",
   "lang": "ar",
   "dir": "rtl",
   "icons": [

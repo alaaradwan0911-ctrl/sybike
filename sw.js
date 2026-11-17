@@ -1,46 +1,51 @@
-const CACHE_NAME = 'syria-bike-v1';
+// غيّر رقم النسخة عند كل تحديث كبير
+const CACHE_NAME = 'syria-bike-v2';
 const ASSETS = [
-  './index.html',
-  './restaurant.html',
-  './driver.html',
-  './admin.html',
-  './manifest.json',
-  './logo.png',
-  './favicon.png',
-  './apple-touch-icon.png'
+  './index.html', './restaurant.html', './driver.html', './admin.html',
+  './premium.css', './manifest.json',
+  './logo.png', './favicon.png', './apple-touch-icon.png',
+  './icon-192.png', './icon-512.png', './icon-maskable-512.png'
 ];
 
-// تثبيت التخزين المؤقت
+// تثبيت: نخزّن كل ملف لحاله، وإذا ملف ناقص ما بيفشل التثبيت كله
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(ASSETS);
+      return Promise.all(ASSETS.map(function(url) {
+        return cache.add(url).catch(function() {});
+      }));
     })
   );
   self.skipWaiting();
 });
 
-// تفعيل الخدمة وحذف الكاش القديم إن وجد
+// تفعيل: حذف الكاش القديم
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.map(function(key) {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
+      return Promise.all(keys.map(function(key) {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      }));
     })
   );
   self.clients.claim();
 });
 
-// جلب الملفات من الكاش عند انقطاع الإنترنت
+// جلب: الشبكة أولاً (دائماً أحدث نسخة)، والكاش فقط عند انقطاع الإنترنت
 self.addEventListener('fetch', function(e) {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return; // لا نتدخل بطلبات فايربيس والخطوط
   e.respondWith(
-    caches.match(e.request).then(function(response) {
-      return response || fetch(e.request);
+    fetch(req).then(function(res) {
+      if (res && res.status === 200) {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(function(c) { c.put(req, copy); });
+      }
+      return res;
+    }).catch(function() {
+      return caches.match(req).then(function(r) { return r || caches.match('./index.html'); });
     })
   );
 });
