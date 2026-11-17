@@ -1,11 +1,10 @@
 // غيّر رقم النسخة عند كل تحديث كبير
-const CACHE_NAME = 'syria-bike-v3';
+const CACHE_NAME = 'syria-bike-v4';
 const ASSETS = [
-  './index.html', './restaurant.html', './driver.html', './admin.html',
-  './premium.css', './manifest.json', './manifest-admin.json',
+  './index.html', './restaurant.html', './driver.html', 
+  './premium.css', './manifest.json',
   './logo.png', './favicon.png', './apple-touch-icon.png',
-  './icon-192.png', './icon-512.png', './icon-maskable-512.png',
-  './admin-192.png', './admin-512.png', './admin-maskable-512.png', './admin-apple-touch-icon.png', './admin-favicon.png'
+  './icon-192.png', './icon-512.png', './icon-maskable-512.png'
 ];
 
 // تثبيت: نخزّن كل ملف لحاله، وإذا ملف ناقص ما بيفشل التثبيت كله
