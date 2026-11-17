@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Syria Bike Command Center</title>
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#622485">
+<title>إدارة سيريا بايك</title>
+<link rel="manifest" href="manifest-admin.json">
+<link rel="icon" type="image/png" href="admin-favicon.png">
+<link rel="apple-touch-icon" href="admin-apple-touch-icon.png">
+<meta name="theme-color" content="#2a1140">
+<meta name="apple-mobile-web-app-title" content="إدارة سيريا بايك">
 <style>
   body { margin:0; font-family:Arial,sans-serif; background:#f4f4f4; padding-bottom:20px; }
   header { background:#4a148c; color:white; padding:16px; text-align:center; font-size:22px; font-weight:bold; }
@@ -48,6 +49,7 @@
   .empty { text-align:center; color:#888; padding:30px; }
 </style>
   <link rel="stylesheet" href="premium.css">
+  <style>header{background:linear-gradient(120deg,#1a0a2a,#2a1140 70%,#4a1a68)!important;border-bottom-color:#F3D007!important}</style>
 </head>
 <body>
 <header>⚙️ Syria Bike Command Center</header>
@@ -63,7 +65,6 @@
 <div id="app">
   <div class="topBtns">
     <button id="logout">خروج</button>
-    <button id="changeRole">تغيير الدور</button>
   </div>
   <div id="banner"></div>
   <div class="stats">
@@ -282,6 +283,7 @@ document.addEventListener('click', async function(e) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && $('loginBox').style.display !== 'none') { doLogin(); }
 });
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
 </html>

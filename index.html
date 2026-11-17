@@ -25,7 +25,6 @@
   .r-customer { background:#2e7d32; }
   .r-restaurant { background:#e65100; }
   .r-driver { background:#1565c0; }
-  .r-admin { background:#4a148c; }
   #authBox { display:none; padding:20px; }
   #authBox h2 { text-align:center; color:#2e7d32; }
   #authBox input { width:100%; box-sizing:border-box; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:8px; font-size:16px; }
@@ -72,7 +71,7 @@
 
 <script>
 (function() {
-  var pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
+  var pages = { restaurant: 'restaurant.html', driver: 'driver.html' };
   var role = localStorage.getItem('sb_role');
   var forceChoose = location.search.indexOf('choose=1') !== -1;
   if (!forceChoose && role && pages[role]) { location.replace(pages[role]); }
@@ -94,7 +93,6 @@
   <button class="role r-customer" data-role="customer">🛒 أنا زبون<small>اطلب من المطاعم والمتاجر</small></button>
   <button class="role r-restaurant" data-role="restaurant">🍽️ أنا مطعم أو متجر<small>استقبل الطلبات وأدر منتجاتك</small></button>
   <button class="role r-driver" data-role="driver">🚲 أنا سائق<small>استلم الطلبات وأوصلها</small></button>
-  <button class="role r-admin" data-role="admin">⚙️ أنا المدير<small>لوحة التحكم</small></button>
 </div>
 
 <div id="authBox">
@@ -159,7 +157,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const pages = { restaurant: 'restaurant.html', driver: 'driver.html', admin: 'admin.html' };
+const pages = { restaurant: 'restaurant.html', driver: 'driver.html' };
 const STATES = { new:'تم استلام طلبك', cooking:'قيد التحضير', ready:'جاهز، بانتظار السائق', onway:'السائق بالطريق إليك', delivered:'تم التوصيل' };
 const DELIVERY_FEE = 20000;
 
