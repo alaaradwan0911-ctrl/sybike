@@ -1,5 +1,5 @@
 // غيّر رقم النسخة عند كل تحديث كبير
-const CACHE_NAME = 'syria-bike-v4';
+const CACHE_NAME = 'syria-bike-v5';
 const ASSETS = [
   './index.html', './restaurant.html', './driver.html', 
   './premium.css', './manifest.json',

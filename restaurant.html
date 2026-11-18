@@ -54,10 +54,12 @@
 <header>🍽️ واجهة المطعم</header>
 
 <div id="loginBox">
-  <h2>تسجيل دخول المطعم</h2>
+  <h2 id="authTitle">تسجيل دخول المطعم</h2>
+  <input id="regName" maxlength="60" placeholder="اسم المحل (متل ما بدك الزبون يشوفه)" style="display:none">
   <input id="email" type="email" placeholder="الإيميل">
   <input id="pass" type="password" placeholder="كلمة السر">
   <button id="loginBtn">دخول</button>
+  <button id="modeBtn" type="button">ما عندك حساب؟ سجّل محلك الآن</button>
   <div id="loginErr"></div>
 </div>
 
@@ -93,8 +95,8 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, addDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
@@ -141,6 +143,7 @@ function stopAll() {
   unsubs = [];
   stopShop();
   member = null;
+  memberLoaded = false;
 }
 
 function startShop(name) {
@@ -158,14 +161,16 @@ function startShop(name) {
 function listenMember() {
   unsubs.push(onSnapshot(doc(db, 'members', myEmail), function(snap) {
     const oldName = validShop() ? member.name : null;
+    const wasOk = subOk();
     member = snap.exists() ? snap.data() : null;
+    memberLoaded = true;
     if (validShop()) {
-      if (member.name !== oldName) startShop(member.name);
+      if (member.name !== oldName || wasOk !== subOk()) startShop(member.name);
     } else {
       stopShop();
     }
     render();
-  }, function(err) { console.error(err); member = null; render(); }));
+  }, function(err) { console.error(err); member = null; memberLoaded = true; render(); }));
 }
 
 onAuthStateChanged(auth, function(user) {
@@ -183,10 +188,72 @@ onAuthStateChanged(auth, function(user) {
   }
 });
 
+let memberLoaded = false;
+let registering = false;
+let registerMode = false;
+
+function renderMode() {
+  $('authTitle').textContent = registerMode ? 'تسجيل محل / مطعم جديد' : 'تسجيل دخول المطعم';
+  $('regName').style.display = registerMode ? 'block' : 'none';
+  $('loginBtn').textContent = registerMode ? 'إنشاء الحساب' : 'دخول';
+  $('modeBtn').textContent = registerMode ? 'عندك حساب؟ سجّل دخولك' : 'ما عندك حساب؟ سجّل محلك الآن';
+  $('loginErr').textContent = '';
+}
+
+function unlinkedHtml() {
+  if (!memberLoaded || registering) return '<div class="empty">جاري التحميل...</div>';
+  if (member) return '<div class="sub bad">⚠️ هذا الإيميل مسجّل بنوع حساب ثاني (سائق). استخدم إيميل ثاني.</div>';
+  return '<div class="add"><b>أكمل تسجيل محلك</b><br><br>' +
+    '<input id="regName2" maxlength="60" placeholder="اسم المحل (متل ما بدك الزبون يشوفه)">' +
+    '<button id="completeReg">تسجيل المحل</button>' +
+    '<div class="hint" style="margin-top:8px">بعد التسجيل تواصل مع الإدارة لتفعيل الاشتراك.</div></div>';
+}
+
+async function createMember(rawName) {
+  const name = String(rawName || '').trim().replace(/\s+/g, ' ');
+  if (name.length < 2 || name.length > 60) { alert('اكتب اسم المحل (حرفين على الأقل)'); return false; }
+  const email = ((auth.currentUser && auth.currentUser.email) || '').toLowerCase();
+  if (!email) return false;
+  registering = true;
+  try {
+    await setDoc(doc(db, 'members', email), { name: name, email: email, type: 'shop', paidUntil: 0, createdAt: Date.now() });
+    return true;
+  } catch (err) {
+    console.error(err);
+    alert('صار خطأ بالتسجيل، جرب مرة ثانية');
+    return false;
+  } finally {
+    registering = false;
+    render();
+  }
+}
+
 async function doLogin() {
   const email = $('email').value.trim();
   const pass = $('pass').value;
   $('loginErr').textContent = '';
+
+  if (registerMode) {
+    const name = $('regName').value.trim();
+    if (name.length < 2) { $('loginErr').textContent = 'اكتب اسم المحل (حرفين على الأقل)'; return; }
+    if (!email || !pass) { $('loginErr').textContent = 'اكتب الإيميل وكلمة السر'; return; }
+    registering = true;
+    try {
+      await createUserWithEmailAndPassword(auth, email, pass);
+    } catch (e) {
+      registering = false;
+      const c = e && e.code ? e.code : '';
+      let msg = 'صار خطأ، جرب مرة ثانية';
+      if (c === 'auth/email-already-in-use') msg = 'هذا الإيميل مسجّل من قبل. سجّل دخولك، وإذا ما كان مسجّل هون رح يطلب منك تكمل التسجيل.';
+      else if (c === 'auth/weak-password') msg = 'كلمة السر ضعيفة (6 أحرف على الأقل)';
+      else if (c === 'auth/invalid-email') msg = 'الإيميل غير صحيح';
+      $('loginErr').textContent = msg;
+      return;
+    }
+    await createMember(name);
+    return;
+  }
+
   try {
     await signInWithEmailAndPassword(auth, email, pass);
   } catch (e) {
@@ -202,7 +269,7 @@ function render() {
 
   if (!validShop()) {
     $('shopName').textContent = '';
-    $('subBar').innerHTML = '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي محل. تواصل مع الإدارة.</div>';
+    $('subBar').innerHTML = unlinkedHtml();
     $('info').textContent = '';
     $('ordersList').innerHTML = '';
     $('prodList').innerHTML = '';
@@ -275,6 +342,8 @@ document.addEventListener('click', async function(e) {
   const t = e.target;
   if (t.id === 'loginBtn') { doLogin(); return; }
   if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'modeBtn') { registerMode = !registerMode; renderMode(); return; }
+  if (t.id === 'completeReg') { await createMember($('regName2').value); return; }
   if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
   if (t.dataset.tab) { current = Number(t.dataset.tab); render(); return; }
 
