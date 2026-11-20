@@ -35,3 +35,205 @@
   .onway { background:#fff9c4; color:#f57f17; }
   .order button { width:100%; padding:12px; margin-top:10px; border:none; border-radius:8px; font-size:16px; font-weight:bold; color:white; background:#1565c0; }
   .order button.done { background:#2e7d32; }
+  .order button:disabled { background:#bbb; }
+  .empty { text-align:center; color:#888; padding:30px; }
+</style>
+  <link rel="stylesheet" href="premium.css">
+</head>
+<body>
+<header>🚲 واجهة السائق</header>
+
+<div id="loginBox">
+  <h2>تسجيل دخول السائق</h2>
+  <input id="email" type="email" placeholder="الإيميل">
+  <input id="pass" type="password" placeholder="كلمة السر">
+  <button id="loginBtn">دخول</button>
+  <div id="loginErr"></div>
+</div>
+
+<div id="app">
+  <div class="topBtns">
+    <button id="logout">خروج</button>
+    <button id="changeRole">تغيير الدور</button>
+  </div>
+  <div class="who" id="who"></div>
+  <div id="subBar"></div>
+  <div class="stats">
+    <div class="stat">توصيلاتك<b id="count">0</b></div>
+    <div class="stat">أرباحك<b id="earn">0</b></div>
+  </div>
+  <div id="orders"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDh6GFQR5CzjnRLsrTS5FhWrHRZmLG5QSc",
+  authDomain: "syria-bike.firebaseapp.com",
+  projectId: "syria-bike",
+  storageBucket: "syria-bike.firebasestorage.app",
+  messagingSenderId: "417884008874",
+  appId: "1:417884008874:web:f95dc7c3886c765b3bbbd3"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const labels = {ready:'جاهز للاستلام', onway:'في الطريق للزبون'};
+let myEmail = '';
+let member = null;
+let readyOrders = [];
+let mineOrders = [];
+let unsubs = [];
+let orderUnsubs = [];
+
+function $(id) { return document.getElementById(id); }
+function fmt(x) { return Number(x).toLocaleString('ar-SY') + ' ل.س'; }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function validDriver() { return member && member.type === 'driver'; }
+function subOk() { return !!(member && member.paidUntil && member.paidUntil > Date.now()); }
+
+function stopOrders() {
+  orderUnsubs.forEach(function(f) { f(); });
+  orderUnsubs = [];
+  readyOrders = [];
+  mineOrders = [];
+}
+
+function stopAll() {
+  unsubs.forEach(function(f) { f(); });
+  unsubs = [];
+  stopOrders();
+  member = null;
+}
+
+function startOrders() {
+  if (orderUnsubs.length) return;
+  orderUnsubs.push(onSnapshot(query(collection(db, 'orders'), where('state', '==', 'ready')), function(snap) {
+    readyOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+    render();
+  }, function(err) { console.error(err); }));
+  orderUnsubs.push(onSnapshot(query(collection(db, 'orders'), where('driverEmail', '==', myEmail)), function(snap) {
+    mineOrders = snap.docs.map(function(d) { const o = d.data(); o.id = d.id; return o; });
+    render();
+  }, function(err) { console.error(err); }));
+}
+
+function listenMember() {
+  unsubs.push(onSnapshot(doc(db, 'members', myEmail), function(snap) {
+    member = snap.exists() ? snap.data() : null;
+    if (validDriver()) { startOrders(); } else { stopOrders(); }
+    render();
+  }, function(err) { console.error(err); member = null; render(); }));
+}
+
+onAuthStateChanged(auth, function(user) {
+  stopAll();
+  if (user) {
+    myEmail = (user.email || '').toLowerCase();
+    $('loginBox').style.display = 'none';
+    $('app').style.display = 'block';
+    listenMember();
+    render();
+  } else {
+    myEmail = '';
+    $('loginBox').style.display = 'block';
+    $('app').style.display = 'none';
+  }
+});
+
+async function doLogin() {
+  const email = $('email').value.trim();
+  const pass = $('pass').value;
+  $('loginErr').textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    $('loginErr').textContent = 'الإيميل أو كلمة السر غير صحيحة';
+  }
+}
+
+function render() {
+  const box = $('orders');
+
+  if (!validDriver()) {
+    $('who').textContent = '';
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ هذا الإيميل غير مربوط بأي سائق. تواصل مع الإدارة.</div>';
+    $('count').textContent = '0';
+    $('earn').textContent = fmt(0);
+    box.innerHTML = '';
+    return;
+  }
+
+  const ok = subOk();
+  $('who').textContent = '🚲 ' + member.name;
+  if (ok) {
+    $('subBar').innerHTML = '<div class="sub ok">✅ اشتراكك مفعّل حتى ' + new Date(member.paidUntil).toLocaleDateString('ar-SY') + '</div>';
+  } else if (member.paidUntil) {
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ اشتراكك منتهي. تواصل مع الإدارة لتجديده (5 دولار بالشهر)</div>';
+  } else {
+    $('subBar').innerHTML = '<div class="sub bad">⚠️ اشتراكك غير مفعّل. تواصل مع الإدارة لتفعيله (5 دولار بالشهر)</div>';
+  }
+
+  const done = mineOrders.filter(function(o) { return o.state === 'delivered'; });
+  $('count').textContent = done.length;
+  $('earn').textContent = fmt(done.reduce(function(s, o) { return s + (o.deliveryFee || 0); }, 0));
+
+  const active = mineOrders.filter(function(o) { return o.state === 'onway'; });
+  const list = active.concat(readyOrders);
+
+  if (list.length === 0) { box.innerHTML = '<div class="empty">لا يوجد طلبات حالياً</div>'; return; }
+
+  box.innerHTML = list.map(function(o) {
+    const shops = (o.shops || []).map(esc).join('، ');
+    let btn;
+    if (o.state === 'ready') {
+      btn = '<button class="act" ' + (ok ? '' : 'disabled') + ' data-id="' + esc(o.id) + '" data-s="onway">' +
+        (ok ? 'استلمت الطلب' : 'الاشتراك غير مفعّل') + '</button>';
+    } else {
+      btn = '<button class="act done" data-id="' + esc(o.id) + '" data-s="delivered">تم التوصيل</button>';
+    }
+    const map = (typeof o.lat === 'number' && typeof o.lng === 'number')
+      ? '<div class="line"><a href="https://www.google.com/maps?q=' + o.lat + ',' + o.lng + '" target="_blank" rel="noopener">🗺️ افتح موقع الزبون بالخريطة</a></div>'
+      : '';
+    return '<div class="order"><span class="status ' + esc(o.state) + '">' + esc(labels[o.state]) + '</span>' +
+      '<h3>طلب رقم ' + esc(o.id.slice(0, 6)) + '</h3>' +
+      '<div class="line">🍽️ من: ' + shops + '</div>' +
+      '<div class="line">👤 الزبون: ' + esc(o.customer) + '</div>' +
+      '<div class="line">📍 إلى: ' + esc(o.address) + '</div>' + map +
+      '<div class="line">💵 المبلغ المطلوب من الزبون: ' + fmt(o.total || 0) + '</div>' +
+      '<div class="line">🚲 أجرتك من هذا الطلب: ' + fmt(o.deliveryFee || 0) + '</div>' + btn + '</div>';
+  }).join('');
+}
+
+document.addEventListener('click', async function(e) {
+  const t = e.target;
+  if (t.id === 'loginBtn') { doLogin(); return; }
+  if (t.id === 'logout') { signOut(auth); return; }
+  if (t.id === 'changeRole') { localStorage.removeItem('sb_role'); location.href = 'index.html?choose=1'; return; }
+  if (!t.classList.contains('act') || t.disabled) return;
+  if (!validDriver()) { alert('هذا الإيميل غير مربوط بسائق'); return; }
+  const data = { state: t.dataset.s };
+  if (t.dataset.s === 'onway') { data.driver = member.name; data.driverEmail = myEmail; }
+  try {
+    await updateDoc(doc(db, 'orders', t.dataset.id), data);
+  } catch (err) {
+    alert('صار خطأ، جرب مرة ثانية (ممكن سائق ثاني استلم الطلب قبلك)');
+    console.error(err);
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && $('loginBox').style.display !== 'none') { doLogin(); }
+});
+</script>
+</body>
+</html>
